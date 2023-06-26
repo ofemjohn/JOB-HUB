@@ -50,7 +50,7 @@ Apply security measures to protect user data and prevent common attacks (e.g., S
 Regularly update and patch your software dependencies.
 
 
-MYSQL USER MANAGEMENT
+MYSQL USER MANAGEMENT:
 Employers and job seekers will share the same user authentication system but with different roles assigned.
 Upon registration, users can select their role and will be redirected to the relevant features and functionalities.
 This approach offers flexibility while still differentiating between employer and job seeker functionalities.
