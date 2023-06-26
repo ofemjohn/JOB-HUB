@@ -144,3 +144,10 @@ Footer:
 8. Place footer content at the bottom of each page.
 Include links to important pages, such as home, job listings, about us, and contact us.
 Add social media icons for users to connect with your website's social media accounts.
+
+###################################################################################################################################
+When a user submits an application, check if the application_link is provided in the associated job listing.
+If an application_link is available, redirect the user to that link to continue the application process on the third-party website.
+If no application_link is available, send the application details (including the uploaded application file) to the email address specified in the job listing.
+To implement the email functionality, you can use a library like Flask-Mail or a third-party email service provider such as SendGrid or Mailgun. These libraries provide APIs to send emails programmatically.
+
