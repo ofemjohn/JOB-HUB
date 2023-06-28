@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 from db.db import DB
-
+from db.models import User, JobListing, Application
 
 app = Flask(__name__)
 DB = DB(app)
