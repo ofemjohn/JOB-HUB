@@ -1,8 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 
-load_dotenv()
 
 db = SQLAlchemy()
 load_dotenv()
@@ -16,7 +16,7 @@ class DB:
 
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        app.secret_key = os.environ.get('SECRET_KEY')
+        app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
 
         db.init_app(app)
 
