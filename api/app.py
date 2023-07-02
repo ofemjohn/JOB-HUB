@@ -4,10 +4,14 @@ from controllers.auth import Auth, is_valid_email, set_attributes
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity, unset_jwt_cookies
-from jwt.exceptions import InvalidTokenError
 from db.models import User
 from db.db import db
 from datetime import datetime
+from controllers.joblisting import Joblist, set_joblisting_attributes
+from db.models import JobListing
+from sqlalchemy.exc import DataError
+import re
+
 
 app = Flask(__name__)
 DB = DB(app)
@@ -150,6 +154,208 @@ def update_user():
     except Exception as e:
         return jsonify(
             {"success": False, "message": "Error occurred", "error": str(e)}), 500
+
+# Create  a new Job Post
+@app.route('/api/joblisting', methods=['POST'])
+@jwt_required()
+def create_joblisting():
+    data = request.json
+    application_email = data['application_email']
+    if not application_email or not is_valid_email(application_email):
+        return jsonify(
+            {"message": "Please provide a valid email address", "success": False}), 400
+    try:
+        current_user_email = get_jwt_identity()
+        user = User.query.filter_by(email=current_user_email).first()
+        if not user:
+            return jsonify(
+                {"message": "User not found", "success": False}), 404
+        data['user_id'] = user.id
+        Joblist.create_job_listing(data)
+        return jsonify(
+            {"message": f'Job posted successfully', "success": True}), 200
+    except DataError as e:
+        return jsonify(
+            {"success": False, "message": "Data truncation error occurred", "error": str(e)}), 400
+    except Exception as e:
+        return jsonify(
+            {"success": False, "message": "Error occurred while posting job", "error": str(e)}), 500
+
+
+# Retrieve the list of jobs
+@app.route('/api/get_joblistings', methods=['GET'])
+@jwt_required()
+def get_joblisting():
+    try:
+        current_user_email = get_jwt_identity()
+        user = User.query.filter_by(email=current_user_email).first()
+        if user is None:
+            return jsonify(
+                {"message": "User not found", "success": False}), 404
+        
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 10))
+
+        job_listings = JobListing.query.filter_by(user_id=user.id).all()
+        paginated_job_listings, total_pages = Joblist.paginate_results(job_listings, page, per_page)
+
+        job_listings_data = [job.to_dict() for job in paginated_job_listings]
+
+        return jsonify({
+            "message": "Job listings retrieved successfully",
+            "success": True,
+            "job_listings": job_listings_data,
+            "total_pages": total_pages
+        }), 200
+    except Exception as e:
+        return jsonify({"message": "Error occurred while retrieving job listings", "success": False}), 500
+
+
+# Filter job listings by location with regex and pagination
+@app.route('/api/joblistings/filter/location', methods=['GET'])
+@jwt_required()
+def filter_joblistings_by_location():
+    try:
+        current_user_email = get_jwt_identity()
+        user = User.query.filter_by(email=current_user_email).first()
+        if user is None:
+            return jsonify({"message": "User not found", "success": False}), 404
+
+        data = request.json
+        location_input = data.get('location')
+        if not location_input:
+            return jsonify({"message": "Please provide a location", "success": False}), 400
+
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 10))
+
+        # Build the regex pattern
+        pattern = r'\b{}\b'.format(re.escape(location_input))
+
+        # Perform regex search using the REGEXP operator
+        job_listings = JobListing.query.filter(
+            JobListing.location.op("REGEXP")(pattern)
+        ).all()
+
+        paginated_job_listings, total_pages = Joblist.paginate_results(job_listings, page, per_page)
+
+        job_listings_data = [job.to_dict() for job in paginated_job_listings]
+
+        return jsonify({
+            "message": "Job listings filtered by location successfully",
+            "success": True,
+            "job_listings": job_listings_data,
+            "total_pages": total_pages
+        }), 200
+    except Exception as e:
+        return jsonify({"message": "Error occurred while filtering job listings", "success": False}), 500
+
+
+
+# Filter job listings by salary range with regex and pagination
+@app.route('/api/joblistings/filter/salary', methods=['GET'])
+@jwt_required()
+def filter_joblistings_by_salary():
+    try:
+        current_user_email = get_jwt_identity()
+        user = User.query.filter_by(email=current_user_email).first()
+        if user is None:
+            return jsonify({"message": "User not found", "success": False}), 404
+
+        data = request.json
+        salary_range_input = data.get('salary')
+        if not salary_range_input:
+            return jsonify({"message": "Please provide a salary range", "success": False}), 400
+
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 10))
+
+        # Parse the salary range input
+        match = re.match(r'^(\d+)-(\d+)$', salary_range_input)
+        if not match:
+            return jsonify({"message": "Invalid salary range format", "success": False}), 400
+
+        min_salary = int(match.group(1))
+        max_salary = int(match.group(2))
+
+        # Perform the salary range filtering
+        job_listings = JobListing.query.filter(
+            JobListing.salary.between(min_salary, max_salary)
+        ).all()
+
+        paginated_job_listings, total_pages = Joblist.paginate_results(job_listings, page, per_page)
+
+        job_listings_data = [job.to_dict() for job in paginated_job_listings]
+
+        return jsonify({
+            "message": "Job listings filtered by salary range successfully",
+            "success": True,
+            "job_listings": job_listings_data,
+            "total_pages": total_pages
+        }), 200
+    except Exception as e:
+        return jsonify({"message": "Error occurred while filtering job listings", "success": False}), 500
+
+
+    
+
+# Update a job posting
+@app.route("/api/update_joblistings/<int:job_id>", methods=["PUT"])
+@jwt_required()
+def update_job_post(job_id):
+    data = request.json
+    application_email = data.get('application_email')
+    if not application_email or not is_valid_email(application_email):
+        return jsonify({"message": "Please provide a valid email address", "success": False}), 400
+
+    try:
+        current_user_email = get_jwt_identity()
+        user = User.query.filter_by(email=current_user_email).first()
+
+        if not user:
+            return jsonify({"message": "User not found", "success": False}), 404
+
+        job_listing = JobListing.query.filter_by(id=job_id, user_id=user.id).first()
+
+        if not job_listing:
+            return jsonify({"message": "Job listing not found", "success": False}), 404
+
+        job_listing = set_joblisting_attributes(job_listing, **data)
+        job_listing.updated_at = datetime.now()
+        db.session.commit()
+
+        return jsonify({"message": "Job listing updated successfully", "success": True}), 200
+    except Exception as e:
+        return jsonify({"message": "Error occurred while updating job listing", "success": False, "error": str(e)}), 500
+    
+
+# Delete a job posting from the database
+@app.route("/api/delete_joblisting/<int:job_id>", methods=["DELETE"])
+@jwt_required()
+def delete_job_listing(job_id):
+    try:
+        current_user_email = get_jwt_identity()
+        user = User.query.filter_by(email=current_user_email).first()
+
+        if not user:
+            return jsonify({"message": "User not found", "success": False}), 404
+
+        job_listing = JobListing.query.filter_by(id=job_id, user_id=user.id).first()
+
+        if not job_listing:
+            return jsonify({"message": "Job listing not found", "success": False}), 404
+
+        db.session.delete(job_listing)
+        db.session.commit()
+
+        return jsonify({"message": "Job listing deleted successfully", "success": True}), 200
+    except Exception as e:
+        return jsonify({"message": "Error occurred while deleting job listing", "success": False, "error": str(e)}), 500
+
+    
+
+
+
 
 
 if __name__ == '__main__':

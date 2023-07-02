@@ -41,7 +41,7 @@ class JobListing(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
     location = db.Column(db.String(100))
-    salary = db.Column(db.Float)
+    salary = db.Column(db.String(250))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     application_email = db.Column(db.String(100))
     application_link = db.Column(db.String(200))
