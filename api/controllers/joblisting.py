@@ -51,15 +51,17 @@ class Joblist:
 
         new_job_listing = add_joblisting(data)
         return new_job_listing
-    
 
     @staticmethod
     def job_listing_by_id(id: int) -> JobListing:
         Joblisting = find_joblisting(id=id)
         return Joblisting.to_dict()
-    
+
     @staticmethod
-    def paginate_results(results: list, page: int, per_page: int) -> JobListing:
+    def paginate_results(
+            results: list,
+            page: int,
+            per_page: int) -> JobListing:
         total_results = len(results)
         total_pages = math.ceil(total_results / per_page)
 
