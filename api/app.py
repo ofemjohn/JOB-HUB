@@ -17,15 +17,17 @@ from werkzeug.utils import secure_filename
 from flask_mail import Message
 from flask_mail import Mail
 from flask import send_from_directory
+from flask_cors import CORS
 
 
 app = Flask(__name__)
 DB = DB(app)
 jwt = JWTManager(app)
 mail = Mail(app)
+CORS(app, supports_credentials=True)
 
 
-@app.route('/', methods=['GET'])
+@app.route('/api', methods=['GET'])
 def test():
     # test route
     return jsonify({"message": "This is a test message"})
@@ -580,4 +582,4 @@ def get_listing_applications():
 
 if __name__ == '__main__':
     DB.create_all()
-    app.run(debug=True, port='5002')
+    app.run(debug=True, port=5002)
