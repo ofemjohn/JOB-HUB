@@ -23,7 +23,8 @@ const LoginPage = () => {
         marginBottom: '50px',
         marginTop: '50px',
         height: '80vh',
-        bgcolor: '#f0f0f0'
+        bgcolor: '#f0f0f0',
+        sx: 'auto',
       }}
     >
       <Box>

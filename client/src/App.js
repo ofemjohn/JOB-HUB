@@ -7,14 +7,18 @@ import JobListingDetails from "./pages/JobListingDetails";
 import UpdateJobListing from "./pages/UpdateJobListing";
 import ApplyForJob from "./pages/ApplyForJob";
 import Applications from "./pages/Applications";
-import Logout from "./pages/Logout";
 import NotFound from "./pages/NotFound";
 import UnAuthorized from "./components/UnAuthorized";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
+import { SnackbarProvider } from './components/SnackBarContext';
+import ToastMessage from './components/ToastMessage'
+
+
 
 const App = () => {
   return (
+     <SnackbarProvider>
     <Routes>
       <Route path="/" element={<Layout />}>
         {/* Use 'index' for the Home component */}
@@ -31,10 +35,11 @@ const App = () => {
         <Route path="/update_joblistings" element={<UpdateJobListing />} />
         <Route path="/apply_job" element={<ApplyForJob />} />
         <Route path="/applications" element={<Applications />} />
-        <Route path="/logout" element={<Logout />} />
         <Route path="*" element={<NotFound />} />
       </Route>
-    </Routes>
+      </Routes>
+      <ToastMessage />
+      </SnackbarProvider>
   );
 };
 

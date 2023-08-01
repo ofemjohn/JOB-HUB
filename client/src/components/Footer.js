@@ -12,13 +12,14 @@ const Footer = () => {
         justifyContent: "space-between",
         alignItems: "center",
         padding: 10,
+        height: "1vh",
       }}
     >
       
-      <Typography variant="h6" sx={{ color: "white" }}>
+      <Typography variant="h6" sx={{ color: "white", marginTop: "-50px", }}>
         JOB HUB
       </Typography>
-      <Typography variant="subtitle1" sx={{ color: "white" }}>
+      <Typography variant="subtitle1" sx={{ color: "white", marginBottom: "-50px", }}>
         RCCG SOW Copyright © 2023. All Right Reserved
       </Typography>
     </Box>

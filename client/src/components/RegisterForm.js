@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Avatar, Button, Grid, MenuItem, Paper, TextField, Typography } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import axios from 'axios';
+import { useSnackbarContext } from '../components/SnackBarContext';
+import { useNavigate } from "react-router-dom";
 
 
 
-const LoginForm = () => {
+const RegisterForm = () => {
+  const navigate = useNavigate();
+  const { showSnackbar } = useSnackbarContext();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -15,9 +19,8 @@ const LoginForm = () => {
     Country : '',
   })
 
-
-  // const [selectedCountry, setSelectedCountry] = useState('');
   const [countries, setCountries] = useState([]);
+  
 
   const apiUrl = 'https://restcountries.com/v3.1/all';
 
@@ -52,11 +55,15 @@ const LoginForm = () => {
       const response = await axios.post('/api/register', formData);
       if (response.data.success) {
         console.log('Successfully registered', response.data.success);
+        showSnackbar('success', response.data.message);
+        navigate("/login");
+        
       } else {
-        console.log('Failed to register', response.data.message);
+        console.log(response.data.message);
+        showSnackbar('error', response.data.message);
       }
     } catch (error) {
-      console.log('Failed to register', error);
+      showSnackbar('error', error.response.data.message);
     }
   };
 
@@ -74,7 +81,7 @@ const LoginForm = () => {
               variant="outlined"
             name="username"
             required
-            placeholder='Enter your username'
+            placeholder='Enter your Full name'
             value={formData.username}
             onChange={handleChange}
             fullWidth
@@ -132,6 +139,7 @@ const LoginForm = () => {
         <Grid item sx={{ width: '100%', mt: 2 }}>
             <TextField
               select
+              required
               label="Select Country"
               variant="outlined"
               value={formData.selectedCountry}
@@ -159,8 +167,8 @@ const LoginForm = () => {
               Sign Up
           </Button>
           </Grid>
-        </Paper>
+      </Paper>
     </Grid>
   )
 }
-export default LoginForm
+export default RegisterForm

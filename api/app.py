@@ -60,9 +60,17 @@ def user_lookup_callback(_jwt_header, jwt_data):
 def register_user():
     data = request.json
     email = data['email']
+
+    # Check if any of the required fields are missing or empty
+    missing_fields = [field for field in data if field not in data or not data[field]]
+    if missing_fields:
+        return jsonify({"message": "All fields are required", "missing_fields": missing_fields, "success": False}), 400
+
+
     if not email or not is_valid_email(email):
         return jsonify(
             {"message": "Please provide a valid email", "success": False}), 400
+  
     try:
         Auth.register_user(data)
         return jsonify(
@@ -90,15 +98,14 @@ def login():
     email = data['email']
     password = data['password']
     if not email or not password:
-        return abort(400)
+         return make_response(jsonify({"error": "Email and password are required."}), 400)
     if Auth.valid_login(email, password):
         access_token = create_access_token(identity=email)
         return make_response({"success": True,
                               "message": "Logged in successfully",
                               "access_token": access_token})
     else:
-        return abort(401)
-
+        return make_response(jsonify({"success": False, "message": "Invalid email or password."}), 401)
 
 # Logout user
 @app.route("/api/logout", methods=["POST"])

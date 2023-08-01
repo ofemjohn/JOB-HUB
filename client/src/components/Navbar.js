@@ -3,22 +3,60 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
-import MenuItem from '@mui/material/MenuItem';
 import logo from '../assets/logo.png';
 import Grid from '@mui/material/Grid';
 import { Link } from 'react-router-dom';
+import { useSnackbarContext } from '../components/SnackBarContext';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-const pages = ['Home', 'Login', 'Dashboard', 'Logout'];
+const pages = ['Home', 'Login', 'Dashboard']; // Remove 'Logout' from the pages array
 
-function Navbar() {
+const Navbar = () => {
+  const navigate = useNavigate();
+  const { showSnackbar } = useSnackbarContext();
+
+  // Function to handle logout
+  const handleLogout = async () => {
+    try {
+      const access_token = localStorage.getItem("access_token");
+
+      // Check if the access token exists in the local storage
+      if (!access_token) {
+        showSnackbar('error', "Access token not found. Please login first.");
+        return;
+      }
+
+      // Add the access token to the authorization header
+      const headers = {
+        Authorization: `Bearer ${access_token}`,
+      };
+
+      const response = await axios.post("/api/logout", null, { headers });
+
+      if (response.data.success) {
+        localStorage.removeItem("access_token"); // Clear the JWT token from local storage
+        showSnackbar('success', response.data.message);
+        navigate('/login'); // Redirect to the login page after logout
+      } else {
+        showSnackbar('error', response.data.message);
+      }
+    } catch (error) {
+      console.log('Error logging out', error);
+      showSnackbar('error', "Error logging out. Please try again.");
+    }
+  };
+
   const [anchorElNav, setAnchorElNav] = React.useState(null);
 
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
+
+  // Check if the user is logged in based on the existence of the access token in the localStorage
+  const isLoggedIn = !!localStorage.getItem("access_token");
 
   return (
     <AppBar position="static" sx={{ backgroundColor: '#2E3B55' }}>
@@ -63,7 +101,11 @@ function Navbar() {
               >
                 <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
                   {pages.map((page) => (
-                    <Link key={page} to={page === 'Home' ? '/' : `/${page.toLowerCase()}`} style={{ textDecoration: 'none' }}>
+                    <Link
+                      key={page}
+                      to={page === 'Home' ? '/' : `/${page.toLowerCase()}`}
+                      style={{ textDecoration: 'none' }}
+                    >
                       <Button
                         onClick={handleCloseNavMenu}
                         sx={{ my: 2, color: 'white', marginLeft: '8px' }}
@@ -74,31 +116,23 @@ function Navbar() {
                   ))}
                 </Box>
 
-                <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-                  <Menu
-                    id="menu-appbar"
-                    anchorEl={anchorElNav}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'right',
-                    }}
-                    keepMounted
-                    transformOrigin={{
-                      vertical: 'top',
-                      horizontal: 'right',
-                    }}
-                    open={Boolean(anchorElNav)}
-                    onClose={handleCloseNavMenu}
+                {/* Render the Logout button only when the user is logged in */}
+                {isLoggedIn && (
+                  <Button
+                    onClick={handleLogout}
                     sx={{
-                      display: { xs: 'block', md: 'none' },
+                      my: 2,
+                      color: 'white',
+                      marginLeft: '8px',
+                      display: { xs: 'none', md: 'block' },
                     }}
                   >
-                    {pages.map((page) => (
-                      <MenuItem key={page} onClick={handleCloseNavMenu}>
-                        {page}
-                      </MenuItem>
-                    ))}
-                  </Menu>
+                    Logout
+                  </Button>
+                )}
+
+                <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
+                  {/* ... (other code) */}
                 </Box>
               </Box>
             </Grid>
