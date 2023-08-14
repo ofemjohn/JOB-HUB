@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -21,11 +21,11 @@ const Navbar = () => {
   // Function to handle logout
   const handleLogout = async () => {
     try {
-      const access_token = localStorage.getItem("access_token");
+      const access_token = localStorage.getItem('access_token');
 
       // Check if the access token exists in the local storage
       if (!access_token) {
-        showSnackbar('error', "Access token not found. Please login first.");
+        showSnackbar('error', 'Access token not found. Please login first.');
         return;
       }
 
@@ -34,10 +34,10 @@ const Navbar = () => {
         Authorization: `Bearer ${access_token}`,
       };
 
-      const response = await axios.post("/api/logout", null, { headers });
+      const response = await axios.post('/api/logout', null, { headers });
 
       if (response.data.success) {
-        localStorage.removeItem("access_token"); // Clear the JWT token from local storage
+        localStorage.removeItem('access_token'); // Clear the JWT token from local storage
         showSnackbar('success', response.data.message);
         navigate('/login'); // Redirect to the login page after logout
       } else {
@@ -45,7 +45,7 @@ const Navbar = () => {
       }
     } catch (error) {
       console.log('Error logging out', error);
-      showSnackbar('error', "Error logging out. Please try again.");
+      showSnackbar('error', 'Error logging out. Please try again.');
     }
   };
 
@@ -56,7 +56,8 @@ const Navbar = () => {
   };
 
   // Check if the user is logged in based on the existence of the access token in the localStorage
-  const isLoggedIn = !!localStorage.getItem("access_token");
+  const isLoggedIn = !!localStorage.getItem('access_token');
+  const isAuthorized = isLoggedIn; // Modify this condition based on your authorization logic
 
   return (
     <AppBar position="static" sx={{ backgroundColor: '#2E3B55' }}>
@@ -116,8 +117,8 @@ const Navbar = () => {
                   ))}
                 </Box>
 
-                {/* Render the Logout button only when the user is logged in */}
-                {isLoggedIn && (
+                {/* Render the Logout button only when the user is authorized */}
+                {isAuthorized && (
                   <Button
                     onClick={handleLogout}
                     sx={{
@@ -141,6 +142,6 @@ const Navbar = () => {
       </Container>
     </AppBar>
   );
-}
+};
 
 export default Navbar;

@@ -8,10 +8,20 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import hero2 from '../assets/hero2.jpg';
+import { useNavigate } from 'react-router-dom';
+import Dialog from '@mui/material/Dialog';
+import axios from 'axios';
+import { useSnackbarContext } from '../components/SnackBarContext';
 import PostJob from '../components/PostJob';
 
+
 export default function Home() {
+  const navigate = useNavigate();
+  const { showSnackbar } = useSnackbarContext();
   const [showJobForm, setShowJobForm] = useState(false);
+  const [locationInput, setLocationInput] = useState('');
+  const [jobListings, setJobListings] = useState([]);
+
 
   const handleCreateJob = () => {
     setShowJobForm(true);
@@ -19,6 +29,41 @@ export default function Home() {
 
   const handleCloseJobForm = () => {
     setShowJobForm(false);
+  };
+
+  const handleSearchJobByLocation = async (e) => {
+  e.preventDefault();
+  try {
+    console.log("Location Input:", locationInput);
+    const response = await axios.get('/api/joblistings/filter/location', {
+      params: {
+        location: locationInput,
+      },
+    });
+
+    console.log("API Response:", response.data);
+
+    if (response.data.success) {
+      const jobListingsData = response.data.job_listings;
+      console.log("Job Listings Data:", jobListingsData);
+
+      setJobListings(jobListingsData);
+
+      // Navigate to SearchByLocation route with joblistings as state
+      navigate('/searchLocation', { state: { joblistings: jobListingsData } });
+    } else {
+      showSnackbar('error', response.data.message);
+    }
+  } catch (error) {
+    console.error("Error fetching job listings:", error);
+    showSnackbar('error', 'Error fetching job listings');
+  }
+};
+
+
+
+  const handleApplyJob = () => {
+    navigate('/get_joblistings');
   };
 
   return (
@@ -38,6 +83,8 @@ export default function Home() {
           }}
         >
           <Box
+            component="form"
+            onSubmit={handleSearchJobByLocation}
             sx={{
               display: 'flex',
               alignItems: 'center',
@@ -49,8 +96,11 @@ export default function Home() {
               id="standard-basic"
               label="Search Job By Location"
               variant="filled"
+              value={locationInput}
+              onChange={(e) => setLocationInput(e.target.value)}
             />
             <Button
+              type="submit"
               variant="contained"
               color="secondary"
               sx={{
@@ -67,7 +117,6 @@ export default function Home() {
           </Box>
           <Grid container spacing={2} sx={{ height: '70vh', marginTop: '400px' }}>
             <Grid item xs={6} sx={{ marginTop: '120px' }}>
-              {/* Your content for the left side */}
               <Box sx={{ padding: '32px' }}>
                 <Typography sx={{ color: 'black', marginBottom: '15px' }} variant="h3">
                   Create Job Listings &amp; <br />Find the Perfect Candidates
@@ -96,7 +145,6 @@ export default function Home() {
               </Box>
             </Grid>
             <Grid item xs={6} sx={{ position: 'relative', padding: '32px' }}>
-              {/* Your content for the right side */}
               <Box
                 sx={{
                   marginTop: '185px',
@@ -114,25 +162,6 @@ export default function Home() {
               />
             </Grid>
           </Grid>
-          {/* Render the JobListingForm component conditionally */}
-          {showJobForm && (
-            <Box
-              sx={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: 9999,
-                background: 'rgba(255, 255, 255, 0.9)',
-              }}
-            >
-              <PostJob onClose={handleCloseJobForm} />
-            </Box>
-          )}
         </Box>
         <Box
           sx={{
@@ -164,6 +193,7 @@ export default function Home() {
               Click the button below to view our job listings and apply for your dream job today!
             </Typography>
             <Button
+              onClick={handleApplyJob}
               sx={{
                 width: '25%',
                 height: '50px',
@@ -177,6 +207,9 @@ export default function Home() {
           </Box>
         </Box>
       </Container>
+      <Dialog open={showJobForm} onClose={handleCloseJobForm} maxWidth="md" fullWidth>
+        <PostJob onClose={handleCloseJobForm} />
+      </Dialog>
     </React.Fragment>
   );
 }

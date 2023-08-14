@@ -1,44 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Typography, Box, Card, CardContent, Button, Dialog } from '@mui/material';
-import { useSnackbarContext } from '../components/SnackBarContext';
-
+import React from 'react';
+import { Typography, Box, Card, CardContent, Button } from '@mui/material';
 import AddLocationAltTwoToneIcon from '@mui/icons-material/AddLocationAltTwoTone';
+import { useLocation } from 'react-router-dom';
 import hero2 from '../assets/hero2.jpg';
-import ApplyForJob from '../components/ApplyForJob'; // Import ApplyForJob component
 
-const JobCard = () => {
-  const [jobListings, setJobListings] = useState([]);
-  const { showSnackbar } = useSnackbarContext();
-  const [showApplyForJob, setShowApplyForJob] = useState(false);
-  const [selectedJob, setSelectedJob] = useState(null); // Store the selected job for ApplyForJob
-
-  const handleApplyNow = (job) => {
-    setSelectedJob(job); // Store the selected job
-    setShowApplyForJob(true);
-  };
-
-  useEffect(() => {
-    const fetchJobListings = async () => {
-      try {
-        const response = await axios.get('/api/get_joblistings', {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (response.data.success) {
-          setJobListings(response.data.job_listings);
-        } else {
-          showSnackbar('error', response.data.message);
-        }
-      } catch (error) {
-        showSnackbar('error', error.response?.data?.message || 'Error fetching job listings');
-      }
-    };
-
-    fetchJobListings();
-  }, [showSnackbar]);
+const SearchByLocation = () => {
+  const location = useLocation();
+  const jobListings = location.state?.joblistings || [];
 
   return (
     <Box sx={{
@@ -46,10 +14,10 @@ const JobCard = () => {
         maxWidth: '1000px',
         marginLeft: 'auto',
         marginRight: 'auto',
-        backgroundImage: `url(${hero2})`,
+        backgroundImage: `url(${hero2})`, // Replace with the path to your background image
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        padding: '30px',
+        padding: '30px', // Add padding to create space between content and image edges
     }}
     >
       <Typography variant="h4" sx={{ textAlign: 'center', marginBottom: '20px', color: '#5AAD7C' }}>
@@ -79,18 +47,14 @@ const JobCard = () => {
             <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
               Posted on {job.created_at}
             </Typography>
-            <Button onClick={() => handleApplyNow(job)} variant="contained" color="primary" sx={{ height: '40px', backgroundColor: '#125469', '&:hover': { backgroundColor: '#1C8FB4' } }}>
+            <Button variant="contained" color="primary" sx={{ height: '40px', backgroundColor: '#125469', '&:hover': { backgroundColor: '#1C8FB4' } }}>
               Apply Now
             </Button>
           </Box>
         </Card>
       ))}
-      
-      <Dialog open={showApplyForJob} onClose={() => setShowApplyForJob(false)} maxWidth="md" fullWidth>
-        {selectedJob && <ApplyForJob job={selectedJob} onClose={() => setShowApplyForJob(false)} />}
-      </Dialog>
     </Box>
   );
 };
 
-export default JobCard;
+export default SearchByLocation;

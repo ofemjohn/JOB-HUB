@@ -9,7 +9,7 @@ const ToastMessage = () => {
 
   return (
     <Snackbar open={openSnackbar}
-      autoHideDuration={4000}
+      autoHideDuration={5000}
       onClose={hideSnackbar}
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }} 
       >
