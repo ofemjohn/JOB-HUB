@@ -111,8 +111,8 @@ function PostJob({ onClose }) {
                   value={formData.listing_type}
                   onChange={handleChange}
                 >
-                  <FormControlLabel value="female" control={<Radio />} label="I am posting this job for myself" />
-                  <FormControlLabel value="male" control={<Radio />} label="I am posting this job on behalf of a third party" />
+                  <FormControlLabel value="self" control={<Radio />} label="I am posting this job for myself" />
+                  <FormControlLabel value="third party" control={<Radio />} label="I am posting this job on behalf of a third party" />
                 </RadioGroup>
               </FormControl>
             </Grid>

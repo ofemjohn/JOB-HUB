@@ -20,6 +20,7 @@ from flask import send_from_directory
 from flask_cors import CORS
 
 
+
 app = Flask(__name__)
 DB = DB(app)
 jwt = JWTManager(app)
@@ -180,9 +181,12 @@ def create_joblisting():
     data = request.json
     application_email = data['application_email']
     application_link = data['application_link']
+    listing_type = data['listing_type']
     if not application_email and not application_link:
         return jsonify(
             {"message": "Please provide an application email or application link", "success": False}), 400
+    if not listing_type:
+        return jsonify({"message": "please tick the checkbox at the beggining of the form"}), 400
 
     if application_email and not is_valid_email(application_email):
         return jsonify(
@@ -206,56 +210,31 @@ def create_joblisting():
             {"success": False, "message": "Error occurred while posting job", "error": str(e)}), 500
 
 
-# Retrieve the list of jobs
+# Retrieve the list of all jobs
 @app.route('/api/get_joblistings', methods=['GET'])
-@jwt_required()
-def get_joblisting():
+def get_all_joblistings():
     try:
-        current_user_email = get_jwt_identity()
-        user = User.query.filter_by(email=current_user_email).first()
-        if user is None:
-            return jsonify(
-                {"message": "User not found", "success": False}), 404
-
-        page = int(request.args.get('page', 1))
-        per_page = int(request.args.get('per_page', 10))
-
-        job_listings = JobListing.query.filter_by(user_id=user.id).all()
-        paginated_job_listings, total_pages = Joblist.paginate_results(
-            job_listings, page, per_page)
-
-        job_listings_data = [job.to_dict() for job in paginated_job_listings]
+        job_listings = JobListing.query.all()
+        job_listings_data = [job.to_dict() for job in job_listings]
 
         return jsonify({
-            "message": "Job listings retrieved successfully",
+            "message": "All job listings retrieved successfully",
             "success": True,
-            "job_listings": job_listings_data,
-            "total_pages": total_pages
+            "job_listings": job_listings_data
         }), 200
     except Exception as e:
         return jsonify(
             {"message": "Error occurred while retrieving job listings", "success": False}), 500
 
 
-# Filter job listings by location with regex and pagination
+
+# Filter job listings by location with regex
 @app.route('/api/joblistings/filter/location', methods=['GET'])
-@jwt_required()
 def filter_joblistings_by_location():
     try:
-        current_user_email = get_jwt_identity()
-        user = User.query.filter_by(email=current_user_email).first()
-        if user is None:
-            return jsonify(
-                {"message": "User not found", "success": False}), 404
-
-        data = request.json
-        location_input = data.get('location')
+        location_input = request.args.get('location')
         if not location_input:
-            return jsonify(
-                {"message": "Please provide a location", "success": False}), 400
-
-        page = int(request.args.get('page', 1))
-        per_page = int(request.args.get('per_page', 10))
+            return jsonify({"message": "Please provide a location", "success": False}), 400
 
         # Build the regex pattern
         pattern = r'\b{}\b'.format(re.escape(location_input))
@@ -265,23 +244,20 @@ def filter_joblistings_by_location():
             JobListing.location.op("REGEXP")(pattern)
         ).all()
 
-        paginated_job_listings, total_pages = Joblist.paginate_results(
-            job_listings, page, per_page)
-
-        job_listings_data = [job.to_dict() for job in paginated_job_listings]
+        job_listings_data = [job.to_dict() for job in job_listings]
         if job_listings_data == []:
-            return jsonify(
-                {"message": "Sorry no jobs available with the location specified"})
+            return jsonify({"message": "Sorry no jobs available with the location specified"})
 
         return jsonify({
             "message": "Job listings filtered by location successfully",
             "success": True,
-            "job_listings": job_listings_data,
-            "total_pages": total_pages
+            "job_listings": job_listings_data
         }), 200
     except Exception as e:
-        return jsonify(
-            {"message": "Error occurred while filtering job listings", "success": False}), 500
+        return jsonify({"message": "Error occurred while filtering job listings", "success": False}), 500
+
+
+
 
 # Fileter job by salary
 
@@ -412,7 +388,7 @@ def download_file(filename):
     uploads_directory = os.environ.get('UPLOAD_FOLDER')
     return send_from_directory(uploads_directory, filename, as_attachment=True)
 
-
+# apply for job submission
 @app.route("/api/apply_job/<int:job_id>", methods=["POST"])
 @jwt_required()
 def apply_job(job_id):
@@ -429,20 +405,22 @@ def apply_job(job_id):
             return jsonify(
                 {"message": "Job listing not found", "success": False}), 404
 
+        
+        applicant_name = request.form.get('applicant_name')
+        applicant_email = request.form.get('applicant_email')
+
+        resume = request.files.get('resume')
+        resume_filename = secure_filename(
+            resume.filename) if resume else ""
+        resume_url = f"/uploads/{resume_filename}" if resume_filename else ""
+
+        cover_letter = request.files.get('cover_letter')
+        cover_letter_filename = secure_filename(
+            cover_letter.filename) if cover_letter else ""
+        cover_letter_url = f"/uploads/{cover_letter_filename}" if cover_letter_filename else ""
+
+
         if job_listing.listing_type == 'self':
-            applicant_name = request.form.get('applicant_name')
-            applicant_email = request.form.get('applicant_email')
-
-            resume = request.files.get('resume')
-            resume_filename = secure_filename(
-                resume.filename) if resume else ""
-            resume_url = f"/uploads/{resume_filename}" if resume_filename else ""
-
-            cover_letter = request.files.get('cover_letter')
-            cover_letter_filename = secure_filename(
-                cover_letter.filename) if cover_letter else ""
-            cover_letter_url = f"/uploads/{cover_letter_filename}" if cover_letter_filename else ""
-
             # Save other application details to the database
             application = Application(
                 job_listing_id=job_listing.id,
@@ -497,7 +475,7 @@ def apply_job(job_id):
             return jsonify(
                 {"message": "Job application submitted and sent to employers mail successfully", "success": True}), 200
 
-        elif job_listing.listing_type == 'third_party':
+        elif job_listing.listing_type == 'third party':
             return jsonify({"message": "Redirecting to application link", "success": True,
                             "redirect_url": job_listing.application_link}), 200
 
