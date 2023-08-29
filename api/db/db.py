@@ -22,7 +22,7 @@ class DB:
         app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
         app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 86400
 
-        # plask mail configuration
+        # flask mail configuration
         app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER')
         # Use the appropriate port for your email server
         app.config['MAIL_PORT'] = os.environ.get('MAIL_PORT')

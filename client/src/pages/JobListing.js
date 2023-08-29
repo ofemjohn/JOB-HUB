@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Typography, Box, Card, CardContent, Button, Dialog } from '@mui/material';
 import { useSnackbarContext } from '../components/SnackBarContext';
-
 import AddLocationAltTwoToneIcon from '@mui/icons-material/AddLocationAltTwoTone';
 import hero2 from '../assets/hero2.jpg';
-import ApplyForJob from '../components/ApplyForJob'; // Import ApplyForJob component
+import ApplyJob from '../components/ApplyJob'; // Import ApplyForJob component
 
 const JobCard = () => {
   const [jobListings, setJobListings] = useState([]);
@@ -87,8 +86,14 @@ const JobCard = () => {
       ))}
       
       <Dialog open={showApplyForJob} onClose={() => setShowApplyForJob(false)} maxWidth="md" fullWidth>
-        {selectedJob && <ApplyForJob job={selectedJob} onClose={() => setShowApplyForJob(false)} />}
-      </Dialog>
+        {selectedJob && (
+    <ApplyJob
+      job={selectedJob}
+      onClose={() => setShowApplyForJob(false)}
+      jobListingId={selectedJob.id} // Pass the job ID to ApplyForJob
+    />
+  )}
+</Dialog>
     </Box>
   );
 };

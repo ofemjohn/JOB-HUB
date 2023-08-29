@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 // import Register from "./pages/Register";
-import Profile from "./pages/Profile";
+import Profile from "./pages/Dashboard";
 import JobListing from './pages/JobListing';
 import SearchByLocation from "./pages/SearchByLocation";
 import ApplyForJob from "./pages/ApplyForJob";
@@ -18,7 +18,8 @@ import ToastMessage from './components/ToastMessage'
 const App = () => {
   return (
      <SnackbarProvider>
-    <Routes>
+      <Routes>
+      <Route path="/dashboard" element={<Profile />} />
       <Route path="/" element={<Layout />}>
         {/* Use 'index' for the Home component */}
         <Route index element={<Home />} />
@@ -28,7 +29,6 @@ const App = () => {
         {/* Correct the path name here */}
         <Route path="/unauthorized" element={<UnAuthorized />} />
         {/* <Route path="/register" element={<Register />} /> */}
-        <Route path="/dashboard" element={<Profile />} />
         <Route path="/get_joblistings" element={<JobListing />} />
         <Route path="/searchLocation" element={<SearchByLocation />} />
         <Route path="/apply_job" element={<ApplyForJob />} />

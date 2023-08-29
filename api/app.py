@@ -18,6 +18,7 @@ from flask_mail import Message
 from flask_mail import Mail
 from flask import send_from_directory
 from flask_cors import CORS
+import urllib.parse
 
 
 
@@ -138,7 +139,11 @@ def profile():
             return jsonify(
                 {"success": False, "message": "User not found"}), 404
         profile = user.to_dict()
-        return jsonify(profile)
+        return jsonify({
+            "message": "User profile retrieved successfully",
+            "success": True,
+            "profile": profile
+        }), 200
     except Exception as e:
         return jsonify(
             {"success": False, "message": "Error occurred", "error": str(e)}), 500
@@ -171,26 +176,34 @@ def update_user():
     except Exception as e:
         return jsonify(
             {"success": False, "message": "Error occurred", "error": str(e)}), 500
+    
 
-# Create  a new Job Post
 
-
+# def add_https(url: str) -> str:
+#     if not url.startswith('http://') and not url.startswith('https://'):
+#         url = urllib.parse.urljoin('https://', url)
+#     return url
 @app.route('/api/joblisting', methods=['POST'])
 @jwt_required()
 def create_joblisting():
     data = request.json
-    application_email = data['application_email']
-    application_link = data['application_link']
-    listing_type = data['listing_type']
+    application_email = data.get('application_email')
+    application_link = data.get('application_link')
+    listing_type = data.get('listing_type')
+
+    # if listing_type == 'third party' and not application_link:
+    #     return jsonify(
+    #         {"message": "Please provide an application link for third-party job listings.", "success": False}), 400
+
     if not application_email and not application_link:
         return jsonify(
-            {"message": "Please provide an application email or application link", "success": False}), 400
+            {"message": "Please provide an application email or application link.", "success": False}), 400
     if not listing_type:
-        return jsonify({"message": "please tick the checkbox at the beggining of the form"}), 400
+        return jsonify({"message": "Please select the listing type.", "success": False}), 400
 
     if application_email and not is_valid_email(application_email):
         return jsonify(
-            {"message": "Please provide a valid email address", "success": False}), 400
+            {"message": "Please provide a valid email address.", "success": False}), 400
 
     try:
         current_user_email = get_jwt_identity()
@@ -198,6 +211,10 @@ def create_joblisting():
         if not user:
             return jsonify(
                 {"message": "User not found", "success": False}), 404
+
+        # # Check if the application_link includes a protocol, and add if missing
+        # application_link = add_https(application_link)
+
         data['user_id'] = user.id
         Joblist.create_job_listing(data)
         return jsonify(
@@ -397,28 +414,23 @@ def apply_job(job_id):
         user = User.query.filter_by(email=current_user_email).first()
 
         if not user:
-            return jsonify(
-                {"message": "User not found", "success": False}), 404
+            return jsonify({"message": "User not found", "success": False}), 404
 
         job_listing = JobListing.query.filter_by(id=job_id).first()
         if not job_listing:
-            return jsonify(
-                {"message": "Job listing not found", "success": False}), 404
+            return jsonify({"message": "Job listing not found", "success": False}), 404
 
-        
         applicant_name = request.form.get('applicant_name')
         applicant_email = request.form.get('applicant_email')
 
         resume = request.files.get('resume')
-        resume_filename = secure_filename(
-            resume.filename) if resume else ""
+        resume_filename = secure_filename(resume.filename) if resume else ""
         resume_url = f"/uploads/{resume_filename}" if resume_filename else ""
 
         cover_letter = request.files.get('cover_letter')
         cover_letter_filename = secure_filename(
             cover_letter.filename) if cover_letter else ""
         cover_letter_url = f"/uploads/{cover_letter_filename}" if cover_letter_filename else ""
-
 
         if job_listing.listing_type == 'self':
             # Save other application details to the database
@@ -434,61 +446,75 @@ def apply_job(job_id):
             db.session.add(application)
             db.session.commit()
 
-            # Send email to the employer
-            employer_email = job_listing.application_email
-            job_title = job_listing.title
+            # Send email to the employer if applicant_email is provided
+            if applicant_email:
+                employer_email = job_listing.application_email
+                job_title = job_listing.title
 
-            msg = Message("New Job Application",
-                          sender="info@johnteacher.tech",
-                          recipients=[employer_email])
+                msg = Message("New Job Application",
+                              sender="info@johnteacher.tech",
+                              recipients=[employer_email])
 
-            msg.body = f"Job Title: {job_title}\n\n" \
-                       f"Applicant Name: {applicant_name}\n" \
-                       f"Applicant Email: {applicant_email}\n" \
-                       f"Resume: {resume_url}\n" \
-                       f"Cover Letter: {cover_letter_url}"
+                msg.body = f"Job Title: {job_title}\n\n" \
+                           f"Applicant Name: {applicant_name}\n" \
+                           f"Applicant Email: {applicant_email}\n" \
+                           f"Resume: {resume_url}\n" \
+                           f"Cover Letter: {cover_letter_url}"
 
-            # Attach resume and cover letter as downloadable links
-            if resume:
-                resume_path = os.path.join(
-                    app.config['UPLOAD_FOLDER'], resume_filename)
-                resume.save(resume_path)
-                with app.open_resource(resume_path) as resume_file:
-                    msg.attach(
-                        resume_filename,
-                        "application/octet-stream",
-                        resume_file.read())
-                os.remove(resume_path)
-            if cover_letter:
-                cover_letter_path = os.path.join(
-                    app.config['UPLOAD_FOLDER'], cover_letter_filename)
-                cover_letter.save(cover_letter_path)
-                with app.open_resource(cover_letter_path) as cover_letter_file:
-                    msg.attach(
-                        cover_letter_filename,
-                        "application/octet-stream",
-                        cover_letter_file.read())
-                os.remove(cover_letter_path)
+                # Attach resume and cover letter as downloadable links
+                if resume:
+                    resume_path = os.path.join(
+                        app.config['UPLOAD_FOLDER'], resume_filename)
+                    resume.save(resume_path)
+                    with app.open_resource(resume_path) as resume_file:
+                        msg.attach(
+                            resume_filename,
+                            "application/octet-stream",
+                            resume_file.read())
+                    os.remove(resume_path)
+                if cover_letter:
+                    cover_letter_path = os.path.join(
+                        app.config['UPLOAD_FOLDER'], cover_letter_filename)
+                    cover_letter.save(cover_letter_path)
+                    with app.open_resource(cover_letter_path) as cover_letter_file:
+                        msg.attach(
+                            cover_letter_filename,
+                            "application/octet-stream",
+                            cover_letter_file.read())
+                    os.remove(cover_letter_path)
 
-            mail.send(msg)
+                mail.send(msg)
 
-            return jsonify(
-                {"message": "Job application submitted and sent to employers mail successfully", "success": True}), 200
+            return jsonify({"message": "Job application submitted and sent to employer's mail successfully", "success": True}), 200
 
         elif job_listing.listing_type == 'third party':
-            return jsonify({"message": "Redirecting to application link", "success": True,
+            if applicant_email:
+                # Send email to the employer
+                employer_email = job_listing.application_email
+                job_title = job_listing.title
+
+                msg = Message("New Job Application",
+                              sender="info@johnteacher.tech",
+                              recipients=[employer_email])
+
+                msg.body = f"Job Title: {job_title}\n\n" \
+                           f"Applicant Name: {applicant_name}\n" \
+                           f"Applicant Email: {applicant_email}"
+
+                mail.send(msg)
+
+            return jsonify({"message": "Redirecting to third party application link", "success": True,
                             "redirect_url": job_listing.application_link}), 200
 
         else:
-            return jsonify(
-                {"message": "Invalid job listing type", "success": False}), 400
+            return jsonify({"message": "Invalid job listing type", "success": False}), 400
 
     except Exception as e:
         return jsonify({"message": "Error occurred while applying for job",
                         "success": False, "error": str(e)}), 500
 
 
-# Retrieve all jobs applied to
+# Retrieve all jobs applied to by a given user
 @app.route("/api/applications/applied", methods=["GET"])
 @jwt_required()
 def get_applied_applications():
@@ -505,15 +531,20 @@ def get_applied_applications():
         # You can customize the response format as per your application's needs
         application_list = []
         for application in applications:
-            application_data = {
-                "id": application.id,
-                "job_listing_id": application.job_listing_id,
-                "applicant_name": application.applicant_name,
-                "applicant_email": application.applicant_email,
-                "resume": application.resume,
-                "cover_letter": application.cover_letter
-            }
-            application_list.append(application_data)
+            job_listing = JobListing.query.get(application.job_listing_id)
+            if job_listing:
+                application_data = {
+                    "id": application.id,
+                    "job_listing_id": application.job_listing_id,
+                    "job_title": job_listing.title,  # Add job title to response
+                    "location": job_listing.location,
+                    "applicant_name": application.applicant_name,
+                    "applicant_email": application.applicant_email,
+                    "resume": application.resume,
+                    "cover_letter": application.cover_letter,
+                    "created_at": application.created_at,
+                }
+                application_list.append(application_data)
 
         return jsonify(
             {"applications": application_list, "success": True}), 200
@@ -523,6 +554,7 @@ def get_applied_applications():
                         "success": False, "error": str(e)}), 500
 
 
+# get all jobs posted by the user
 @app.route("/api/applications/listings", methods=["GET"])
 @jwt_required()
 def get_listing_applications():
@@ -531,31 +563,23 @@ def get_listing_applications():
         user = User.query.filter_by(email=current_user_email).first()
 
         if not user:
-            return jsonify(
-                {"message": "User not found", "success": False}), 404
+            return jsonify({"message": "User not found", "success": False}), 404
 
         job_listings = JobListing.query.filter_by(user_id=user.id).all()
 
         listing_data = []
         for listing in job_listings:
-            applications = Application.query.filter_by(
-                job_listing_id=listing.id).all()
-
-            application_list = []
-            for application in applications:
-                application_data = {
-                    "id": application.id,
-                    "applicant_name": application.applicant_name,
-                    "applicant_email": application.applicant_email,
-                    "resume": application.resume,
-                    "cover_letter": application.cover_letter
-                }
-                application_list.append(application_data)
-
             listing_data.append({
                 "job_listing_id": listing.id,
                 "title": listing.title,
-                "applications": application_list
+                "description": listing.description,
+                "location": listing.location,
+                "salary": listing.salary,
+                "listing_type": listing.listing_type,
+                "application_email": listing.application_email,
+                "application_link": listing.application_link,
+                "created_at": listing.created_at,
+                "updated_at": listing.updated_at
             })
 
         return jsonify({"listings": listing_data, "success": True}), 200
@@ -563,6 +587,7 @@ def get_listing_applications():
     except Exception as e:
         return jsonify({"message": "Error occurred while retrieving listing applications",
                         "success": False, "error": str(e)}), 500
+
 
 
 if __name__ == '__main__':

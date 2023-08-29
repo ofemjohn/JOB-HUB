@@ -12,8 +12,6 @@ import { useSnackbarContext } from '../components/SnackBarContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const pages = ['Home', 'Login', 'Dashboard']; // Remove 'Logout' from the pages array
-
 const Navbar = () => {
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbarContext();
@@ -59,6 +57,17 @@ const Navbar = () => {
   const isLoggedIn = !!localStorage.getItem('access_token');
   const isAuthorized = isLoggedIn; // Modify this condition based on your authorization logic
 
+  // Function to handle dashboard click
+  const handleDashboardClick = () => {
+    const access_token = localStorage.getItem('access_token');
+
+    if (access_token) {
+      navigate('dashboard');
+    } else {
+      navigate('unauthorized');
+    }
+  };
+
   return (
     <AppBar position="static" sx={{ backgroundColor: '#2E3B55' }}>
       <Container>
@@ -101,20 +110,28 @@ const Navbar = () => {
                 }}
               >
                 <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-                  {pages.map((page) => (
-                    <Link
-                      key={page}
-                      to={page === 'Home' ? '/' : `/${page.toLowerCase()}`}
-                      style={{ textDecoration: 'none' }}
+                  <Link to="/" style={{ textDecoration: 'none' }}>
+                    <Button
+                      onClick={handleCloseNavMenu}
+                      sx={{ my: 2, color: 'white', marginLeft: '8px' }}
                     >
-                      <Button
-                        onClick={handleCloseNavMenu}
-                        sx={{ my: 2, color: 'white', marginLeft: '8px' }}
-                      >
-                        {page}
-                      </Button>
-                    </Link>
-                  ))}
+                      Home
+                    </Button>
+                  </Link>
+                  <Link to="/login" style={{ textDecoration: 'none' }}>
+                    <Button
+                      onClick={handleCloseNavMenu}
+                      sx={{ my: 2, color: 'white', marginLeft: '8px' }}
+                    >
+                      Login
+                    </Button>
+                  </Link>
+                  <Button
+                    onClick={handleDashboardClick}
+                    sx={{ my: 2, color: 'white', marginLeft: '8px' }}
+                  >
+                    Dashboard
+                  </Button>
                 </Box>
 
                 {/* Render the Logout button only when the user is authorized */}
@@ -141,7 +158,7 @@ const Navbar = () => {
         </Toolbar>
       </Container>
     </AppBar>
-  );
+);
 };
 
 export default Navbar;

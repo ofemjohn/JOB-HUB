@@ -56,7 +56,8 @@ const RegisterForm = () => {
       if (response.data.success) {
         console.log('Successfully registered', response.data.success);
         showSnackbar('success', response.data.message);
-        navigate("/login");
+        navigate('/login');
+        window.location.reload();
         
       } else {
         console.log(response.data.message);
