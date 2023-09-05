@@ -71,18 +71,26 @@ const SearchByLocation = () => {
             <Typography variant="body2" color="text.secondary" sx={{ marginTop: '5px', fontSize: '0.9rem' }}>
               Salary: {job.salary}
             </Typography>
-            <Typography variant="body1" sx={{ mt: 1, fontWeight: 'bold', color: '#333', fontSize: '1rem' }}>
-              Description:
+            <Typography variant="body2" color="text.secondary" sx={{ marginTop: '5px', fontSize: '0.9rem' }}>
+              Job-Type: {job.job_type}
             </Typography>
-            <Typography variant="body1" sx={{ mt: 1, color: '#555', lineHeight: 1.6, fontSize: '0.95rem', padding: '8px 0' }}>
-              {job.description}
+            <Typography variant="body2" color="text.secondary" sx={{ marginTop: '5px', fontSize: '0.9rem' }}>
+              Application_Deadline: {job.application_deadline}
             </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ marginTop: '5px', fontSize: '0.9rem' }}>
+              Experience_Level: {job.experience_level}
+            </Typography>
+            <Box sx={{border: '1px solid #ccc', padding: 2, marginBottom: 2, display: 'flex', alignItems: 'center', bgcolor: '#E0E9E5',}}>
+              <Typography variant="body1" sx={{ mt: 1, color: '#555', lineHeight: 1.6, fontSize: '0.95rem', padding: '8px 0',}}>
+               Description: <br />{job.description}
+                </Typography>
+            </Box>
           </CardContent>
           <Box sx={{ p: 2, borderTop: '1px solid #ddd', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
               Posted on {job.created_at}
             </Typography>
-            <Button  onClick={() => handleApplyNow(job)} variant="contained" color="primary" sx={{ height: '40px', backgroundColor: '#125469', '&:hover': { backgroundColor: '#1C8FB4' } }}>
+            <Button onClick={() => handleApplyNow(job)} variant="contained" color="primary" sx={{ height: '40px', backgroundColor: '#125469', '&:hover': { backgroundColor: '#1C8FB4' } }}>
               Apply Now
             </Button>
           </Box>

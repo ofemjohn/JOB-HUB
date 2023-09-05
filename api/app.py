@@ -191,9 +191,6 @@ def create_joblisting():
     application_link = data.get('application_link')
     listing_type = data.get('listing_type')
 
-    # if listing_type == 'third party' and not application_link:
-    #     return jsonify(
-    #         {"message": "Please provide an application link for third-party job listings.", "success": False}), 400
 
     if not application_email and not application_link:
         return jsonify(

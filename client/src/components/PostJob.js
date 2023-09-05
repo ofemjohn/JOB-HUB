@@ -1,15 +1,26 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Avatar, Button, Grid, Paper, TextField, Typography } from '@mui/material';
+import {
+  Avatar,
+  Button,
+  Grid,
+  Paper,
+  TextField,
+  Typography,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
+  MenuItem, // Added MenuItem import
+} from '@mui/material';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbarContext } from './SnackBarContext';
+
+const experienceLevels = ['Entry-level', 'Mid-level', 'Senior']; // Experience Level options
+const jobTypes = ['Full-time', 'Part-time', 'Contract']; // Job Type options
 
 function PostJob({ onClose }) {
   const navigate = useNavigate();
@@ -24,6 +35,10 @@ function PostJob({ onClose }) {
     listing_type: '',
     application_email: '',
     application_link: '',
+    job_type: '',
+    skills_required: '',
+    experience_level: '',
+    application_deadline: '',
   });
 
   const handleChange = (event) => {
@@ -67,7 +82,7 @@ function PostJob({ onClose }) {
       });
       if (response.data.success) {
         showSnackbar('success', response.data.message);
-       onClose();
+        onClose();
       } else {
         showSnackbar('error', response.data.message);
       }
@@ -75,7 +90,6 @@ function PostJob({ onClose }) {
       showSnackbar('error', error.response?.data?.message || 'An error occurred while posting the job.');
     }
   };
-
 
   // Function to decode JWT token
   const parseJwt = (token) => {
@@ -88,7 +102,7 @@ function PostJob({ onClose }) {
 
   return (
     <Grid container justifyContent="center" alignItems="center">
-      <Paper elevation={24} sx={{ height: '65vh', margin: '20px auto', width: '800px', padding: '20px', position: 'relative' }}>
+      <Paper elevation={24} sx={{ height: 'fit-content', margin: '20px auto', width: '800px', padding: '20px', position: 'relative' }}>
         {/* "Exit" button (using the icon button at the top) */}
         <Button variant="text" color="success" onClick={onClose} sx={{ position: 'absolute', top: '5px', right: '5px', zIndex: 1 }}>
           <CloseRoundedIcon />
@@ -119,7 +133,7 @@ function PostJob({ onClose }) {
           </Grid>
           <Grid container spacing={2} sx={{ mt: 2 }}>
             <Grid item xs={6}>
-              <TextField label="Title" required variant="outlined" name="title" placeholder="Enter the job title" fullWidth  maxLength="50" onChange={handleChange} />
+              <TextField label="Title" required variant="outlined" name="title" placeholder="Enter the job title" fullWidth maxLength={50} onChange={handleChange} />
             </Grid>
             <Grid item xs={6}>
               <TextField label="Location" required variant="outlined" name="location" placeholder="Enter job location" fullWidth onChange={handleChange} />
@@ -130,7 +144,7 @@ function PostJob({ onClose }) {
               <TextField label="Salary" required variant="outlined" name="salary" placeholder="Enter the salary amount" fullWidth onChange={handleChange} />
             </Grid>
             <Grid item xs={6}>
-              <TextField label="Email" variant="outlined" name="application_email" type='email' placeholder="Enter the email to apply for job" fullWidth onChange={handleChange} />
+              <TextField label="Email" variant="outlined" name="application_email" type="email" placeholder="Enter the email to apply for job" fullWidth onChange={handleChange} />
             </Grid>
           </Grid>
           <Grid container spacing={2} sx={{ mt: 2 }}>
@@ -138,10 +152,88 @@ function PostJob({ onClose }) {
               <TextField label="Application Link" variant="outlined" name="application_link" placeholder="Please enter the third party application link" fullWidth onChange={handleChange} />
             </Grid>
             <Grid item xs={6}>
-              <TextField label="Job Description" required variant="outlined" name="description" placeholder="Job Description" fullWidth onChange={handleChange} />
+              <TextField
+                label="Job Type"
+                variant="outlined"
+                name="job_type"
+                select // Use select for dropdown menu
+                fullWidth
+                onChange={handleChange}
+                value={formData.job_type}
+              >
+                {jobTypes.map((option) => (
+                  <MenuItem key={option} value={option}>
+                    {option}
+                  </MenuItem>
+                ))}
+              </TextField>
             </Grid>
           </Grid>
-          <Grid item sx={{ width: '100%', mt: 2 }}>
+          <Grid container spacing={2} sx={{ mt: 2 }}>
+            <Grid item xs={6}>
+              <TextField
+                label="Skills Required"
+                variant="outlined"
+                name="skills_required"
+                placeholder="Enter required skills"
+                fullWidth
+                multiline // Enable multiline
+                rows={4} // Adjust the number of rows
+                onChange={handleChange}
+                // inputProps={{ maxLength: 1000 }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                label="Experience Level"
+                variant="outlined"
+                name="experience_level"
+                select // Use select for dropdown menu
+                fullWidth
+                onChange={handleChange}
+                value={formData.experience_level}
+              >
+                {experienceLevels.map((option) => (
+                  <MenuItem key={option} value={option}>
+                    {option}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+          </Grid>
+          <Grid container spacing={2} sx={{ mt: 2 }}>
+            <Grid item xs={12}>
+              <TextField
+                label="Application Deadline"
+                variant="outlined"
+                name="application_deadline"
+                placeholder="Enter application deadline"
+                fullWidth
+                onChange={handleChange}
+                type="date"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+            </Grid>
+          </Grid>
+          <Grid container spacing={2} sx={{ mt: 2 }}>
+            <Grid item xs={12}>
+              <TextField
+                label="Job Description"
+                required
+                variant="outlined"
+                name="description"
+                placeholder="Job Description"
+                fullWidth
+                multiline
+                rows={4}
+                onChange={handleChange}
+                // inputProps={{ maxLength: 1000 }} // Add this line to restrict input length
+              />
+            </Grid>
+          </Grid>
+          <Grid item xs={12} sx={{ mt: 2 }}>
             <Button variant="contained" type="submit" fullWidth sx={{ backgroundColor: '#055525', color: '#fff' }}>
               Post a Job
             </Button>

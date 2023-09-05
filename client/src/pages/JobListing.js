@@ -41,14 +41,14 @@ const JobCard = () => {
 
   return (
     <Box sx={{
-        margin: '30px',
+      margin: '30px',
         maxWidth: '1000px',
         marginLeft: 'auto',
         marginRight: 'auto',
-        backgroundImage: `url(${hero2})`,
+        backgroundImage: `url(${hero2})`, // Replace with the path to your background image
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        padding: '30px',
+        padding: '30px', // Add padding to create space between content and image edges
     }}
     >
       <Typography variant="h4" sx={{ textAlign: 'center', marginBottom: '20px', color: '#5AAD7C' }}>
@@ -67,12 +67,25 @@ const JobCard = () => {
             <Typography variant="body2" color="text.secondary" sx={{ marginTop: '5px', fontSize: '0.9rem' }}>
               Salary: {job.salary}
             </Typography>
-            <Typography variant="body1" sx={{ mt: 1, fontWeight: 'bold', color: '#333', fontSize: '1rem' }}>
-              Description:
+            <Typography variant="body2" color="text.secondary" sx={{ marginTop: '5px', fontSize: '0.9rem' }}>
+              Job-Type: {job.job_type}
             </Typography>
-            <Typography variant="body1" sx={{ mt: 1, color: '#555', lineHeight: 1.6, fontSize: '0.95rem', padding: '8px 0' }}>
-              {job.description}
+            <Typography variant="body2" color="text.secondary" sx={{ marginTop: '5px', fontSize: '0.9rem' }}>
+              Application_Deadline: {job.application_deadline}
             </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ marginTop: '5px', fontSize: '0.9rem' }}>
+              Experience_Level: {job.experience_level}
+            </Typography>
+            <Box sx={{border: '1px solid #ccc', padding: 2, marginBottom: 2, display: 'flex', alignItems: 'center', bgcolor: '#E0E9E5',}}>
+              <Typography variant="body1" sx={{ mt: 1, color: '#555', lineHeight: 1.6, fontSize: '0.95rem', padding: '8px 0',}}>
+              skills_requiredl: <br />{job.skills_required}
+            </Typography>
+            </Box>
+            <Box sx={{border: '1px solid #ccc', padding: 2, marginBottom: 2, display: 'flex', alignItems: 'center', bgcolor: '#E0E9E5',}}>
+              <Typography variant="body1" sx={{ mt: 1, color: '#555', lineHeight: 1.6, fontSize: '0.95rem', padding: '8px 0',}}>
+               Description: <br />{job.description}
+                </Typography>
+            </Box>
           </CardContent>
           <Box sx={{ p: 2, borderTop: '1px solid #ddd', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.8rem' }}>

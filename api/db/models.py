@@ -44,7 +44,7 @@ class JobListing(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text, nullable=False)
+    description  = db.Column(db.Text, nullable=True)
     location = db.Column(db.String(100))
     salary = db.Column(db.String(250))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -53,6 +53,12 @@ class JobListing(db.Model):
     # Required for self-posted listings
     application_email = db.Column(db.String(100))
     # Required for third-party listings
+    job_type = db.Column(db.String(20), nullable=True)  # Full-time, Part-time, Contract, etc.
+    skills_required = db.Column(db.Text, nullable=True)  # Comma-separated list of skills
+    experience_level = db.Column(db.String(100), nullable=True)  # Entry-level, Mid-level, Senior, etc.
+    application_deadline = db.Column(db.DateTime, nullable=True)  # Deadline for applications
+
+
     application_link = db.Column(db.String(200))
     created_at = db.Column(
         db.DateTime,
@@ -62,6 +68,8 @@ class JobListing(db.Model):
         db.DateTime,
         nullable=False,
         default=datetime.utcnow)
+    
+
 
     applications = db.relationship('Application', backref='job_listing')
 
@@ -78,7 +86,11 @@ class JobListing(db.Model):
             "application_email": self.application_email,
             "application_link": self.application_link,
             "created_at": self.created_at,
-            "updated_at": self.updated_at
+            "updated_at": self.updated_at,
+            "job_type": self.job_type,
+            "skills_required": self.skills_required,
+            "experience_level": self.experience_level,
+            "application_deadline": self.application_deadline
         }
 
 

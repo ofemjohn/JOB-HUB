@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Avatar, Button, Grid, MenuItem, Paper, TextField, Typography } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import axios from 'axios';
 import { useSnackbarContext } from '../components/SnackBarContext';
 import { useNavigate } from "react-router-dom";
-
+import countriesData from '../components/countriesData.json';
 
 
 const RegisterForm = () => {
@@ -19,35 +19,48 @@ const RegisterForm = () => {
     Country : '',
   })
 
-  const [countries, setCountries] = useState([]);
+  // const [countries, setCountries] = useState([]);
   
 
-  const apiUrl = 'https://restcountries.com/v3.1/all';
+  // const apiUrl = 'https://restcountries.com/v3.1/all';
 
-  useEffect(() => {
-    const getCountries = async () => {
-      try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-        // Extract only the required country data (name and code)
-        const countryData = data.map((country) => ({
-          name: country.name.common,
-          code: country.cca2,
-        }));
-        setCountries(countryData);
-      } catch (error) {
-        console.error('Error fetching countries:', error);
-      }
-    };
-    getCountries();
-  }, []);
+  // useEffect(() => {
+  //   const getCountries = async () => {
+  //     try {
+  //       const response = await fetch(apiUrl);
+  //       const data = await response.json();
+  //       // Extract only the required country data (name and code)
+  //       const countryData = data.map((country) => ({
+  //         name: country.name.common,
+  //         code: country.cca2,
+  //       }));
+  //       setCountries(countryData);
+  //     } catch (error) {
+  //       console.error('Error fetching countries:', error);
+  //     }
+  //   };
+  //   getCountries();
+  // }, []);
 
   const handleChange = (event) => {
+  const { name, value } = event.target;
+
+  // Apply length restrictions for skills_required and description fields
+  if (name === "skills_required" || name === "description") {
+    if (value.length <= 1000) {
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+    }
+  } else {
     setFormData({
       ...formData,
-      [event.target.name]: event.target.value
+      [name]: value
     });
-  };
+  }
+};
+
 
 
   const handleSignUp = async () => {
@@ -148,15 +161,15 @@ const RegisterForm = () => {
               fullWidth
               name="Country" // Add a name to the TextField
             >
-               <MenuItem value="">
+                <MenuItem value="">
               <em>Select a country</em>
             </MenuItem>
-            {countries.map((country) => (
-              <MenuItem key={country.code} value={country.code}>
+            {countriesData.map((country) => (
+              <MenuItem key={country.code} value={country.name}>
                 {country.name}
               </MenuItem>
             ))}
-            </TextField>
+          </TextField>
         </Grid>
         <Grid item sx={{ width: '100%', mt: 2 }}>
             <Button
