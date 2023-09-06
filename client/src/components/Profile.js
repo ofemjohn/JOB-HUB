@@ -11,6 +11,7 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import PublicIcon from '@mui/icons-material/Public';
 import FaceIcon from '@mui/icons-material/Face';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import HomeIcon from '@mui/icons-material/Home';
 
 function Profile() {
     const [profileData, setProfileData] = useState(null);
@@ -103,6 +104,10 @@ function Profile() {
                         <Typography variant="body1">
                             <PublicIcon sx={{ marginRight: 1, verticalAlign: 'middle' }} />
                             <strong style={{ marginLeft: '2rem' }}>{profileData.country}</strong>
+                        </Typography>
+                        <Typography variant="body1">
+                            <HomeIcon sx={{ marginRight: 1, verticalAlign: 'middle' }} />
+                            <strong style={{ marginLeft: '2rem' }}>{profileData.address}</strong>
                         </Typography>
                         <Typography variant="body1">
                             <AccessTimeIcon sx={{ marginRight: 2, verticalAlign: "middle" }} />

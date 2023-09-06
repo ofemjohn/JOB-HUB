@@ -113,10 +113,10 @@ function ApplyJob({ onClose, jobListingId, job }) {
           <CloseRoundedIcon />
         </Button>
         <Grid align="center">
-          <Avatar sx={{ bgcolor: '#055525' }}>
+          <Avatar sx={{ bgcolor: '#055525', mb: '25px' }}>
             <AttachEmailIcon />
           </Avatar>
-          <Typography variant="h5">Apply for the Job: {job.title}</Typography>
+          <Typography variant="h5">Job Title || {job.title}</Typography>
         </Grid>
         <form onSubmit={handleFormSubmit}>
           <Grid container spacing={2} sx={{ mt: 2 }}>
@@ -166,7 +166,11 @@ function ApplyJob({ onClose, jobListingId, job }) {
               variant="contained"
               type="submit"
               fullWidth
-              sx={{ backgroundColor: '#055525', color: '#fff', position: 'relative' }}
+              sx={{
+                backgroundColor: '#125469',
+                '&:hover': { backgroundColor: '#1C8FB4' },
+                color: '#fff', position: 'relative'
+              }}
               disabled={isSubmitting}
             >
               Submit Application

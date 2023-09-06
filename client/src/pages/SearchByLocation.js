@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Typography, Box, Card, CardContent, Button, Dialog } from '@mui/material';
 import AddLocationAltTwoToneIcon from '@mui/icons-material/AddLocationAltTwoTone';
 import { useLocation } from 'react-router-dom';
-import hero2 from '../assets/hero2.jpg';
+import hero1 from '../assets/hero1.jpg';
 import ApplyJob from '../components/ApplyJob';
 import axios from 'axios';
 import { useSnackbarContext } from '../components/SnackBarContext';
@@ -49,19 +49,19 @@ const SearchByLocation = () => {
         maxWidth: '1000px',
         marginLeft: 'auto',
         marginRight: 'auto',
-        backgroundImage: `url(${hero2})`, // Replace with the path to your background image
+        backgroundImage: `url(${hero1})`, // Replace with the path to your background image
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         padding: '30px', // Add padding to create space between content and image edges
     }}
     >
-      <Typography variant="h4" sx={{ textAlign: 'center', marginBottom: '20px', color: '#5AAD7C' }}>
+      <Typography variant="h4" sx={{ textAlign: 'center', marginBottom: '20px', color: '#FFFFFF' }}>
         Available Job Listings
       </Typography>
       {jobListings.map((job) => (
         <Card key={job.id} sx={{ width: '100%', marginBottom: '20px', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', borderRadius: '8px', overflow: 'hidden' }}>
           <CardContent>
-            <Typography variant="h6" sx={{ color: '#333', marginBottom: '10px', fontSize: '1.25rem', fontWeight: 'bold' }}>
+            <Typography variant="h6" sx={{ color: '#212121', marginBottom: '10px', fontSize: '1.25rem', fontWeight: 'bold' }}>
               {job.title}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', fontSize: '0.9rem', color: '#1CB447' }}>
@@ -82,6 +82,11 @@ const SearchByLocation = () => {
             </Typography>
             <Box sx={{border: '1px solid #ccc', padding: 2, marginBottom: 2, display: 'flex', alignItems: 'center', bgcolor: '#E0E9E5',}}>
               <Typography variant="body1" sx={{ mt: 1, color: '#555', lineHeight: 1.6, fontSize: '0.95rem', padding: '8px 0',}}>
+              skills_requiredl: <br />{job.skills_required}
+            </Typography>
+            </Box>
+            <Box sx={{border: '1px solid #ccc', padding: 2, marginBottom: 2, display: 'flex', alignItems: 'center', bgcolor: '#E0E9E5',}}>
+              <Typography variant="body1" sx={{ mt: 1, color: '#555', lineHeight: 1.6, fontSize: '0.95rem', padding: '8px 0',}}>
                Description: <br />{job.description}
                 </Typography>
             </Box>
@@ -96,6 +101,7 @@ const SearchByLocation = () => {
           </Box>
         </Card>
       ))}
+
       <Dialog open={showApplyForJob} onClose={() => setShowApplyForJob(false)} maxWidth="md" fullWidth>
         {selectedJob && (
     <ApplyJob

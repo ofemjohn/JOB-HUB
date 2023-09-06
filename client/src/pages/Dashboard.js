@@ -92,6 +92,11 @@ function Dashboard(props) {
     handleDrawerToggle(); // Close the drawer when a section is clicked
   };
 
+  // Initialize the selected section when the component mounts
+  React.useEffect(() => {
+    setSelectedSection('Profile');
+  }, []);
+
   const drawer = (
     <div>
       <Toolbar>
@@ -236,7 +241,7 @@ function Dashboard(props) {
         sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
       >
         <Toolbar />
-        {/* Conditionally render the selected section */}
+        {/* Render the selected section */}
         {selectedSection === 'Profile' && <Profile />}
         {selectedSection === 'Applied Jobs' && <AppliedJobs />}
         {selectedSection === 'Posted Jobs' && <PostedJobs />}

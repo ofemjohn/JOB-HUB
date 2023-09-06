@@ -73,7 +73,7 @@ export default function Home() {
         <Box
           sx={{
             bgcolor: '#cfe8fc',
-            height: '137vh',
+            height: '100%',
             backgroundImage: `url(${banner1})`,
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center',
@@ -117,18 +117,20 @@ export default function Home() {
           </Box>
           <Grid container spacing={2} sx={{ height: '70vh', marginTop: '400px' }}>
             <Grid item xs={6} sx={{ marginTop: '120px' }}>
-              <Box sx={{ padding: '32px' }}>
-                <Typography sx={{ color: 'black', marginBottom: '15px' }} variant="h3">
-                  Create Job Listings &amp; <br />Find the Perfect Candidates
+              <Box sx={{ padding: '32px', height: '100%'}}>
+                <Typography sx={{ color: '#BDB0B0', marginBottom: '15px' }} variant="h3">
+                  <strong>Create Job Listings & <br />Find the Perfect Candidates</strong>
                 </Typography>
-                <Typography sx={{ marginLeft: '35px', color: '#1C2ED2', marginBottom: '15px' }} variant="h5">
-                  Unlock Your Hiring Potential
+                <Typography sx={{ marginLeft: '35px', color: '#D7CBF9', marginBottom: '15px' }} variant="h5">
+                  <strong>Unlock Your Hiring Potential</strong>
                 </Typography>
-                <Typography sx={{ marginBottom: '15px', color: 'black' }} variant="body1">
-                  Are you looking to attract top talent and streamline your hiring process? Look no further! Our job
-                  posting platform offers you the perfect opportunity to create job listings and connect with qualified
-                  candidates from a diverse range of industries. Ready to take the next step in finding the perfect
-                  candidate? Click below to create your job listing and embark on a successful hiring journey.
+                <Typography sx={{ marginBottom: '15px', color: '#C8D7AF' }} variant="body1">
+                  <bold>
+                    Are you looking to attract top talent and streamline your hiring process? Look no further! Our job
+                    posting platform offers you the perfect opportunity to create job listings and connect with qualified
+                    candidates from a diverse range of industries. Ready to take the next step in finding the perfect
+                    candidate? Click below to create your job listing and embark on a successful hiring journey.
+                  </bold>
                 </Typography>
                 <Button
                   onClick={handleCreateJob}
@@ -166,7 +168,7 @@ export default function Home() {
         <Box
           sx={{
             bgcolor: '#f5f5f5',
-            height: '70vh',
+            height: '100%',
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center',
             backgroundSize: 'cover',
@@ -174,20 +176,22 @@ export default function Home() {
           }}
         >
           <Box sx={{ padding: '32px' }}>
-            <Typography sx={{ textAlign: 'center', marginTop: '150px' }} variant="h1">
-              Are you looking for a new challenge?
+            <Typography sx={{ textAlign: 'center', marginTop: '150px', color: '#212121' }} variant="h1">
+              <strong>Are you looking for a new challenge?</strong>
             </Typography>
             <Typography sx={{ textAlign: 'center', marginTop: '25px', color: '#002278' }} variant="h3">
-              Welcome to the gateway of endless possibilities!
+              <strong>Welcome to the gateway of endless possibilities!</strong>
             </Typography>
             <Typography sx={{ marginTop: '15px' }} variant="body1">
-              If you're craving a thrilling adventure in your career, your search ends here. Get ready to embark on a
-              journey of discovery and success, as we present you with an unparalleled array of job opportunities that
-              are tailored to ignite your passion and fuel your ambitions. We believe in the power of talent and are
-              dedicated to connecting extraordinary individuals like you with opportunities that align with your unique
-              skills and experiences. If you're ready to take that leap and embark on a fulfilling journey that nurtures
-              your growth, pushes your boundaries, and celebrates your passion, then don't hesitate any longer. Your
-              dream job is just one click away
+              <strong>
+                If you're craving a thrilling adventure in your career, your search ends here. Get ready to embark on a
+                journey of discovery and success, as we present you with an unparalleled array of job opportunities that
+                are tailored to ignite your passion and fuel your ambitions. We believe in the power of talent and are
+                dedicated to connecting extraordinary individuals like you with opportunities that align with your unique
+                skills and experiences. If you're ready to take that leap and embark on a fulfilling journey that nurtures
+                your growth, pushes your boundaries, and celebrates your passion, then don't hesitate any longer. Your
+                dream job is just one click away
+                </strong>
             </Typography>
             <Typography sx={{ marginTop: '50px', color: 'green' }} variant="body2">
               Click the button below to view our job listings and apply for your dream job today!

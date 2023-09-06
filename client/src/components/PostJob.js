@@ -234,7 +234,14 @@ function PostJob({ onClose }) {
             </Grid>
           </Grid>
           <Grid item xs={12} sx={{ mt: 2 }}>
-            <Button variant="contained" type="submit" fullWidth sx={{ backgroundColor: '#055525', color: '#fff' }}>
+            <Button variant="contained" type="submit" fullWidth
+              sx={{
+                backgroundColor: '#125469',
+                '&:hover': { backgroundColor: '#1C8FB4' },
+                color: '#fff'
+                
+              }}
+            >
               Post a Job
             </Button>
           </Grid>
