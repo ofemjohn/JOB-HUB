@@ -83,43 +83,48 @@ export default function Home() {
               mr: 2,
             }}
           >
-             <TextField
-              sx={{
-                width: '100%',
-                backgroundColor: 'white',
-                borderRadius: '25px',
-                padding: '5px 15px',
-                marginRight: '10px',
-                ml: 5,
-              }}
-              id="standard-basic"
-              label="Search Job By Location"
-              variant="filled"
-              value={locationInput}
-              onChange={(e) => setLocationInput(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <SearchIcon sx={{ color: 'gray' }} />
-                ),
-              }}
-              InputLabelProps={{
-                style: { color: '#125469' }, // Change the label color to match the button
-              }}
-            />
+           <TextField
+            sx={{
+              width: '80%',
+              height: '80%',
+              backgroundColor: '#F0F0F0', // Light gray background
+              borderRadius: '3px', // Removed rounded edges
+            }}
+            id="outlined-basic"
+            // label="Search Job By Location"
+            variant="outlined"
+            placeholder='Search Job By Location'
+            value={locationInput}
+            onChange={(e) => setLocationInput(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <SearchIcon sx={{ color: 'gray' }} />
+              ),
+            }}
+            InputLabelProps={{
+              style: {
+                color: '#125469',
+                fontSize: '14px', // Increase label font size for better visibility
+              },
+            }}
+          />
 
-            <Button
+          <Button
             type="submit"
             variant="contained"
             color="secondary"
             sx={{
-              height: '56px',
+              height: '55px',
               backgroundColor: '#125469',
-              '&:hover': { backgroundColor: '#1C8FB4', marginRight: '10px' },
-              borderRadius: '25px', // Added borderRadius to match the search field
+              color: 'white',
+              borderRadius: '2px',
+              padding: '0 24px',
+              '&:hover': { backgroundColor: '#1C8FB4' }, // Hover effect
             }}
           >
             Search
           </Button>
+
 
           </Box>
           <Grid container justifyContent="center" alignItems="center">

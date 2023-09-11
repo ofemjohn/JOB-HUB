@@ -42,8 +42,8 @@ const RegisterForm = () => {
       const response = await axios.post('/api/register', formData);
       if (response.data.success) {
         showSnackbar('success', response.data.message);
-        navigate('/login');
-        window.location.reload();
+        navigate('/');
+        // window.location.reload();
       } else {
         showSnackbar('error', response.data.message);
       }
