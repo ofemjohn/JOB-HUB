@@ -12,15 +12,15 @@ import {
   FormControlLabel,
   FormControl,
   FormLabel,
-  MenuItem, // Added MenuItem import
+  MenuItem,
 } from '@mui/material';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbarContext } from './SnackBarContext';
 
-const experienceLevels = ['Entry-level', 'Mid-level', 'Senior']; // Experience Level options
-const jobTypes = ['Full-time', 'Part-time', 'Contract']; // Job Type options
+const experienceLevels = ['Entry-level', 'Mid-level', 'Senior'];
+const jobTypes = ['Full-time', 'Part-time', 'Contract'];
 
 function PostJob({ onClose }) {
   const navigate = useNavigate();
@@ -50,26 +50,20 @@ function PostJob({ onClose }) {
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
-    // Check if the radio button is selected
     if (!formData.listing_type) {
       setFormError(true);
       return;
     }
     try {
       const accessToken = localStorage.getItem('access_token');
-
-      // Check if the token exists and is not expired
       if (!accessToken) {
-        // Redirect to unauthorized page if the token is missing
         navigate('/unauthorized');
         return;
       }
 
-      // Decode the token to check if it's expired
       const decodedToken = parseJwt(accessToken);
       const currentTime = Math.floor(Date.now() / 1000);
       if (decodedToken.exp < currentTime) {
-        // Redirect to unauthorized page if the token is expired
         navigate('/unauthorized');
         return;
       }
@@ -91,7 +85,6 @@ function PostJob({ onClose }) {
     }
   };
 
-  // Function to decode JWT token
   const parseJwt = (token) => {
     try {
       return JSON.parse(atob(token.split('.')[1]));
@@ -102,8 +95,7 @@ function PostJob({ onClose }) {
 
   return (
     <Grid container justifyContent="center" alignItems="center">
-      <Paper elevation={24} sx={{ height: 'fit-content', margin: '20px auto', width: '800px', padding: '20px', position: 'relative' }}>
-        {/* "Exit" button (using the icon button at the top) */}
+      <Paper elevation={24} sx={{ height: 'fit-content', margin: '20px auto', width: '100%', padding: '20px', position: 'relative' }}>
         <Button variant="text" color="success" onClick={onClose} sx={{ position: 'absolute', top: '5px', right: '5px', zIndex: 1 }}>
           <CloseRoundedIcon />
         </Button>

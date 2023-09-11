@@ -10,53 +10,44 @@ import axios from 'axios';
 import { useSnackbarContext } from '../components/SnackBarContext';
 import { useNavigate } from "react-router-dom";
 
-
 const LoginForm = () => {
-
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { showSnackbar } = useSnackbarContext();
 
-  
-
   const handleLogin = async (event) => {
     event.preventDefault();
-    
     const data = {
       email,
       password,
     };
 
     try {
-    const response = await axios.post("/api/authenticate", data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });      
+      const response = await axios.post("/api/authenticate", data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
       if (response.data.success) {
-        console.log('Successfully registered', response.data.success);
         localStorage.setItem("access_token", response.data.access_token);
-        console.log(response.data);
         showSnackbar('success', response.data.message);
         navigate('/');
       } else {
-        console.log(response.data.message);
         showSnackbar('error', response.data.message);
-    }   
+      }
     } catch (error) {
-      console.log('Failed to register', error);
       showSnackbar('error', error.response.data.message);
     }
   };
-  
 
   return (
     <Grid container justifyContent="center" alignItems="center">
-      <Paper elevation={24} sx={{ height: '55vh', margin: '20px auto', width: '280px', padding: '20px' }}>
+      <Paper elevation={24} sx={{ minHeight: '300px', margin: '20px auto', width: '280px', padding: '20px' }}>
         <form onSubmit={handleLogin}>
           <Grid justifyContent="center" alignItems="center" align='center'>
-            <Avatar sx={{ bgcolor: '#055525' }}><LockTwoToneIcon /></Avatar> <br />
+            <Avatar sx={{ bgcolor: '#055525' }}><LockTwoToneIcon /></Avatar>
             <Typography variant='h5'>Login</Typography>
           </Grid>
           <TextField
@@ -78,12 +69,12 @@ const LoginForm = () => {
             required
             type='password'
             value={password}
-            onChange={(event ) => setPassword(event.target.value)}
+            onChange={(event) => setPassword(event.target.value)}
           />
           <FormGroup>
             <FormControlLabel control={<Checkbox />} label="Remember me" />
           </FormGroup>
-          <Button 
+          <Button
             fullWidth
             size="small"
             type='submit'
@@ -93,13 +84,13 @@ const LoginForm = () => {
               '&:hover': { backgroundColor: '#1C8FB4' },
               color: '#fff'
             }}
-          > 
+          >
             Login
           </Button>
         </form>
       </Paper>
     </Grid>
   )
-  }
+}
 
-export default LoginForm
+export default LoginForm;

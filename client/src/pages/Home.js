@@ -13,7 +13,7 @@ import Dialog from '@mui/material/Dialog';
 import axios from 'axios';
 import { useSnackbarContext } from '../components/SnackBarContext';
 import PostJob from '../components/PostJob';
-
+import SearchIcon from '@mui/icons-material/Search';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -21,7 +21,6 @@ export default function Home() {
   const [showJobForm, setShowJobForm] = useState(false);
   const [locationInput, setLocationInput] = useState('');
   const [jobListings, setJobListings] = useState([]);
-
 
   const handleCreateJob = () => {
     setShowJobForm(true);
@@ -32,35 +31,26 @@ export default function Home() {
   };
 
   const handleSearchJobByLocation = async (e) => {
-  e.preventDefault();
-  try {
-    console.log("Location Input:", locationInput);
-    const response = await axios.get('/api/joblistings/filter/location', {
-      params: {
-        location: locationInput,
-      },
-    });
+    e.preventDefault();
+    try {
+      const response = await axios.get('/api/joblistings/filter/location', {
+        params: {
+          location: locationInput,
+        },
+      });
 
-    console.log("API Response:", response.data);
-
-    if (response.data.success) {
-      const jobListingsData = response.data.job_listings;
-      console.log("Job Listings Data:", jobListingsData);
-
-      setJobListings(jobListingsData);
-
-      // Navigate to SearchByLocation route with joblistings as state
-      navigate('/searchLocation', { state: { joblistings: jobListingsData } });
-    } else {
-      showSnackbar('error', response.data.message);
+      if (response.data.success) {
+        const jobListingsData = response.data.job_listings;
+        setJobListings(jobListingsData);
+        navigate('/searchLocation', { state: { joblistings: jobListingsData } });
+      } else {
+        showSnackbar('error', response.data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching job listings:", error);
+      showSnackbar('error', 'Error fetching job listings');
     }
-  } catch (error) {
-    console.error("Error fetching job listings:", error);
-    showSnackbar('error', 'Error fetching job listings');
-  }
-};
-
-
+  };
 
   const handleApplyJob = () => {
     navigate('/get_joblistings');
@@ -73,7 +63,7 @@ export default function Home() {
         <Box
           sx={{
             bgcolor: '#cfe8fc',
-            height: '100%',
+            minHeight: '100vh',
             backgroundImage: `url(${banner1})`,
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center',
@@ -89,131 +79,125 @@ export default function Home() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              mt: 3,
+              mr: 2,
             }}
           >
-            <TextField
-              sx={{ marginTop: '100px', width: '50%', backgroundColor: 'white' }}
+             <TextField
+              sx={{
+                width: '100%',
+                backgroundColor: 'white',
+                borderRadius: '25px',
+                padding: '5px 15px',
+                marginRight: '10px',
+                ml: 5,
+              }}
               id="standard-basic"
               label="Search Job By Location"
               variant="filled"
               value={locationInput}
               onChange={(e) => setLocationInput(e.target.value)}
-            />
-            <Button
-              type="submit"
-              variant="contained"
-              color="secondary"
-              sx={{
-                marginTop: '100px',
-                width: '10%',
-                marginLeft: '5px',
-                height: '56px',
-                backgroundColor: '#125469',
-                '&:hover': { backgroundColor: '#1C8FB4' },
+              InputProps={{
+                startAdornment: (
+                  <SearchIcon sx={{ color: 'gray' }} />
+                ),
               }}
-            >
-              Search
-            </Button>
+              InputLabelProps={{
+                style: { color: '#125469' }, // Change the label color to match the button
+              }}
+            />
+
+            <Button
+            type="submit"
+            variant="contained"
+            color="secondary"
+            sx={{
+              height: '56px',
+              backgroundColor: '#125469',
+              '&:hover': { backgroundColor: '#1C8FB4', marginRight: '10px' },
+              borderRadius: '25px', // Added borderRadius to match the search field
+            }}
+          >
+            Search
+          </Button>
+
           </Box>
-          <Grid container spacing={2} sx={{ height: '70vh', marginTop: '400px' }}>
-            <Grid item xs={6} sx={{ marginTop: '120px' }}>
-              <Box sx={{ padding: '32px', height: '100%'}}>
-                <Typography sx={{ color: '#BDB0B0', marginBottom: '15px' }} variant="h3">
-                  <strong>Create Job Listings & <br />Find the Perfect Candidates</strong>
+          <Grid container justifyContent="center" alignItems="center">
+            <Grid item xs={12} md={6}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  p: 3,
+                  bgcolor: 'white',
+                  borderRadius: '4px',
+                  mt: '100px',
+                }}
+              >
+                <Typography variant="h4" color="textPrimary">
+                  Create Job Listings & Find the Perfect Candidates
                 </Typography>
-                <Typography sx={{ marginLeft: '35px', color: '#D7CBF9', marginBottom: '15px' }} variant="h5">
-                  <strong>Unlock Your Hiring Potential</strong>
+                <Typography variant="h6" color="primary">
+                  Unlock Your Hiring Potential
                 </Typography>
-                <Typography sx={{ marginBottom: '15px', color: '#C8D7AF' }} variant="body1">
-                  <bold>
-                    Are you looking to attract top talent and streamline your hiring process? Look no further! Our job
-                    posting platform offers you the perfect opportunity to create job listings and connect with qualified
-                    candidates from a diverse range of industries. Ready to take the next step in finding the perfect
-                    candidate? Click below to create your job listing and embark on a successful hiring journey.
-                  </bold>
+                <Typography variant="body1" color="textSecondary">
+                  Are you looking to attract top talent and streamline your hiring process? Our job posting platform offers you the perfect opportunity to create job listings and connect with qualified candidates.
                 </Typography>
                 <Button
                   onClick={handleCreateJob}
-                  sx={{
-                    width: '100%',
-                    height: '50px',
-                    backgroundColor: '#125469',
-                    '&:hover': { backgroundColor: '#1C8FB4' },
-                  }}
                   variant="contained"
+                  color="primary"
+                  sx={{ mt: 2, backgroundColor: '#125469',
+                '&:hover': { backgroundColor: '#1C8FB4' }, }}
                 >
                   Create a Job Posting
                 </Button>
               </Box>
             </Grid>
-            <Grid item xs={6} sx={{ position: 'relative', padding: '32px' }}>
-              <Box
-                sx={{
-                  marginTop: '185px',
-                  height: '60%',
-                  backgroundImage: `url(${hero2})`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'center',
-                  backgroundSize: 'cover',
-                  filter: 'blur(0px)',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  borderRadius: '4px',
-                  boxShadow: '0 0 4px 5px rgba(0, 0, 0, 0.7)',
-                }}
-              />
-            </Grid>
           </Grid>
         </Box>
-        <Box
-          sx={{
-            bgcolor: '#f5f5f5',
-            height: '100%',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            backgroundSize: 'cover',
-            overflowX: 'hidden',
-          }}
-        >
-          <Box sx={{ padding: '32px' }}>
-            <Typography sx={{ textAlign: 'center', marginTop: '150px', color: '#212121' }} variant="h1">
-              <strong>Are you looking for a new challenge?</strong>
-            </Typography>
-            <Typography sx={{ textAlign: 'center', marginTop: '25px', color: '#002278' }} variant="h3">
-              <strong>Welcome to the gateway of endless possibilities!</strong>
-            </Typography>
-            <Typography sx={{ marginTop: '15px' }} variant="body1">
-              <strong>
-                If you're craving a thrilling adventure in your career, your search ends here. Get ready to embark on a
-                journey of discovery and success, as we present you with an unparalleled array of job opportunities that
-                are tailored to ignite your passion and fuel your ambitions. We believe in the power of talent and are
-                dedicated to connecting extraordinary individuals like you with opportunities that align with your unique
-                skills and experiences. If you're ready to take that leap and embark on a fulfilling journey that nurtures
-                your growth, pushes your boundaries, and celebrates your passion, then don't hesitate any longer. Your
-                dream job is just one click away
-                </strong>
-            </Typography>
-            <Typography sx={{ marginTop: '50px', color: 'green' }} variant="body2">
-              Click the button below to view our job listings and apply for your dream job today!
-            </Typography>
-            <Button
-              onClick={handleApplyJob}
+        <Grid container sx={{ mt: 4, mb: 4, height: '100%' }}>
+          <Grid item xs={12} md={6}>
+            <Box sx={{ p: 3 }}>
+              <Typography variant="h4">
+                Are you looking for a new challenge?
+              </Typography>
+              <Typography variant="h6" color="primary">
+                Welcome to the gateway of endless possibilities!
+              </Typography>
+              <Typography variant="body1">
+                If you're craving a thrilling adventure in your career, your search ends here. Get ready to embark on a journey of discovery and success, as we present you with an unparalleled array of job opportunities that are tailored to ignite your passion and fuel your ambitions.
+              </Typography>
+              <Button
+                onClick={handleApplyJob}
+                variant="contained"
+                color="primary"
+                sx={{ mt: 2, backgroundColor: '#125469',
+              '&:hover': { backgroundColor: '#1C8FB4', marginRight: '10px' }, }}
+              >
+                Find Your Dream Job
+              </Button>
+            </Box>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Box
               sx={{
-                width: '25%',
-                height: '50px',
-                backgroundColor: '#125469',
-                '&:hover': { backgroundColor: '#1C8FB4' },
+                height: '100%',
+                backgroundImage: `url(${hero2})`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+                backgroundSize: 'cover',
+                borderRadius: '4px',
+                boxShadow: '0 0 4px 5px rgba(0, 0, 0, 0.7)',
               }}
-              variant="contained"
-            >
-              Find Your Dream Job
-            </Button>
-          </Box>
-        </Box>
+            />
+          </Grid>
+        </Grid>
+        <Dialog open={showJobForm} onClose={handleCloseJobForm} maxWidth="md" fullWidth>
+          <PostJob onClose={handleCloseJobForm} />
+        </Dialog>
       </Container>
-      <Dialog open={showJobForm} onClose={handleCloseJobForm} maxWidth="md" fullWidth>
-        <PostJob onClose={handleCloseJobForm} />
-      </Dialog>
     </React.Fragment>
   );
 }

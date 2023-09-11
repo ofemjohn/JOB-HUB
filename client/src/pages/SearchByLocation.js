@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Box, Card, CardContent, Button, Dialog } from '@mui/material';
+import { Typography, Box, Card, CardContent, Button, Dialog, Container } from '@mui/material';
 import AddLocationAltTwoToneIcon from '@mui/icons-material/AddLocationAltTwoTone';
 import { useLocation } from 'react-router-dom';
 import hero1 from '../assets/hero1.jpg';
@@ -44,16 +44,15 @@ const SearchByLocation = () => {
   }, [showSnackbar]);
 
   return (
-    <Box sx={{
-        margin: '30px',
-        maxWidth: '1000px',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        backgroundImage: `url(${hero1})`, // Replace with the path to your background image
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        padding: '30px', // Add padding to create space between content and image edges
-    }}
+    <Container maxWidth="lg"> {/* Added Container for responsiveness */}
+      <Box
+        sx={{
+          margin: '30px',
+          backgroundImage: `url(${hero1})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          padding: '30px',
+        }}
     >
       <Typography variant="h4" sx={{ textAlign: 'center', marginBottom: '20px', color: '#FFFFFF' }}>
         Available Job Listings
@@ -110,8 +109,9 @@ const SearchByLocation = () => {
       jobListingId={selectedJob.id} // Pass the job ID to ApplyForJob
     />
   )}
-</Dialog>
-    </Box>
+   </Dialog>
+      </Box>
+    </Container>
   );
 };
 

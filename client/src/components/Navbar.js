@@ -11,6 +11,12 @@ import { Link } from 'react-router-dom';
 import { useSnackbarContext } from '../components/SnackBarContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import MenuIcon from '@mui/icons-material/Menu';
+import IconButton from '@mui/material/IconButton';
+import Drawer from '@mui/material/Drawer';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -68,6 +74,13 @@ const Navbar = () => {
     }
   };
 
+  // Responsive Menu State
+  const [menuOpen, setMenuOpen] = React.useState(false);
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
   return (
     <AppBar position="static" sx={{ backgroundColor: '#2E3B55' }}>
       <Container>
@@ -106,14 +119,71 @@ const Navbar = () => {
               <Box
                 sx={{
                   display: 'flex',
-                  justifyContent: { xs: 'flex-end', md: 'flex-start' },
+                  alignItems: 'center',
                 }}
               >
-                <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+                <IconButton
+                  onClick={toggleMenu}
+                  sx={{ color: 'white', display: { md: 'none' } }}
+                >
+                  <MenuIcon />
+                </IconButton>
+
+                {/* Render the Menu Drawer for mobile */}
+                <Drawer
+                  anchor="right"
+                  open={menuOpen}
+                  onClose={toggleMenu}
+                  PaperProps={{
+                    sx: {
+                      width: '200px',
+                    },
+                  }}
+                >
+                  <List>
+                    <ListItem
+                      button
+                      onClick={toggleMenu}
+                      component={Link}
+                      to="/"
+                    >
+                      <ListItemText primary="Home" />
+                    </ListItem>
+                    <ListItem
+                      button
+                      onClick={toggleMenu}
+                      component={Link}
+                      to="/login"
+                    >
+                      <ListItemText primary="Login" />
+                    </ListItem>
+                    {isAuthorized && (
+                      <ListItem button onClick={handleLogout}>
+                        <ListItemText primary="Logout" />
+                      </ListItem>
+                    )}
+                    <ListItem // Add the Dashboard link for mobile view
+                      button
+                      onClick={() => {
+                        toggleMenu();
+                        handleDashboardClick();
+                      }}
+                    >
+                      <ListItemText primary="Dashboard" />
+                    </ListItem>
+                  </List>
+                </Drawer>
+
+                <Box
+                  sx={{
+                    display: { xs: 'none', md: 'flex' },
+                    ml: 2,
+                  }}
+                >
                   <Link to="/" style={{ textDecoration: 'none' }}>
                     <Button
                       onClick={handleCloseNavMenu}
-                      sx={{ my: 2, color: 'white', marginLeft: '8px' }}
+                      sx={{ color: 'white', marginLeft: '8px' }}
                     >
                       Home
                     </Button>
@@ -121,14 +191,14 @@ const Navbar = () => {
                   <Link to="/login" style={{ textDecoration: 'none' }}>
                     <Button
                       onClick={handleCloseNavMenu}
-                      sx={{ my: 2, color: 'white', marginLeft: '8px' }}
+                      sx={{ color: 'white', marginLeft: '8px' }}
                     >
                       Login
                     </Button>
                   </Link>
                   <Button
                     onClick={handleDashboardClick}
-                    sx={{ my: 2, color: 'white', marginLeft: '8px' }}
+                    sx={{ color: 'white', marginLeft: '8px' }}
                   >
                     Dashboard
                   </Button>
@@ -139,7 +209,6 @@ const Navbar = () => {
                   <Button
                     onClick={handleLogout}
                     sx={{
-                      my: 2,
                       color: 'white',
                       marginLeft: '8px',
                       display: { xs: 'none', md: 'block' },
@@ -158,7 +227,7 @@ const Navbar = () => {
         </Toolbar>
       </Container>
     </AppBar>
-);
+  );
 };
 
 export default Navbar;

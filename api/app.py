@@ -21,7 +21,6 @@ from flask_cors import CORS
 import urllib.parse
 
 
-
 app = Flask(__name__)
 DB = DB(app)
 jwt = JWTManager(app)
@@ -64,15 +63,15 @@ def register_user():
     email = data['email']
 
     # Check if any of the required fields are missing or empty
-    missing_fields = [field for field in data if field not in data or not data[field]]
+    missing_fields = [
+        field for field in data if field not in data or not data[field]]
     if missing_fields:
         return jsonify({"message": "All fields are required", "missing_fields": missing_fields, "success": False}), 400
-
 
     if not email or not is_valid_email(email):
         return jsonify(
             {"message": "Please provide a valid email", "success": False}), 400
-  
+
     try:
         Auth.register_user(data)
         return jsonify(
@@ -100,7 +99,7 @@ def login():
     email = data['email']
     password = data['password']
     if not email or not password:
-         return make_response(jsonify({"error": "Email and password are required."}), 400)
+        return make_response(jsonify({"error": "Email and password are required."}), 400)
     if Auth.valid_login(email, password):
         access_token = create_access_token(identity=email)
         return make_response({"success": True,
@@ -110,6 +109,8 @@ def login():
         return make_response(jsonify({"success": False, "message": "Invalid email or password."}), 401)
 
 # Logout user
+
+
 @app.route("/api/logout", methods=["POST"])
 @jwt_required()
 def logout():
@@ -176,7 +177,6 @@ def update_user():
     except Exception as e:
         return jsonify(
             {"success": False, "message": "Error occurred", "error": str(e)}), 500
-    
 
 
 # def add_https(url: str) -> str:
@@ -190,7 +190,6 @@ def create_joblisting():
     application_email = data.get('application_email')
     application_link = data.get('application_link')
     listing_type = data.get('listing_type')
-
 
     if not application_email and not application_link:
         return jsonify(
@@ -241,7 +240,6 @@ def get_all_joblistings():
             {"message": "Error occurred while retrieving job listings", "success": False}), 500
 
 
-
 # Filter job listings by location with regex
 @app.route('/api/joblistings/filter/location', methods=['GET'])
 def filter_joblistings_by_location():
@@ -269,8 +267,6 @@ def filter_joblistings_by_location():
         }), 200
     except Exception as e:
         return jsonify({"message": "Error occurred while filtering job listings", "success": False}), 500
-
-
 
 
 # Fileter job by salary
@@ -403,6 +399,8 @@ def download_file(filename):
     return send_from_directory(uploads_directory, filename, as_attachment=True)
 
 # apply for job submission
+
+
 @app.route("/api/apply_job/<int:job_id>", methods=["POST"])
 @jwt_required()
 def apply_job(job_id):
@@ -586,7 +584,6 @@ def get_listing_applications():
                         "success": False, "error": str(e)}), 500
 
 
-
 if __name__ == '__main__':
     DB.create_all()
-    app.run(debug=True, port=5002)
+    app.run(debug=True, port=5000)
