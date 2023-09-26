@@ -582,6 +582,38 @@ def get_listing_applications():
     except Exception as e:
         return jsonify({"message": "Error occurred while retrieving listing applications",
                         "success": False, "error": str(e)}), 500
+    
+
+# Route for sending feedback via email
+@app.route("/api/send_feedback", methods=["POST"])
+# @jwt_required()
+def send_feedback():
+    try:
+        # Parse JSON data from the request
+        data = request.json
+
+        feedback_type = data.get('feedback_type')
+        job_title = data.get('job_title')
+        date = data.get('date')
+        comments = data.get('comments')
+
+        # Create and send feedback email
+        msg = Message("Feedback Submission",
+                      sender="info@johnteacher.tech",
+                      recipients=["ofemjohn@gmail.com"])  # Replace with the recipient's email address
+
+        msg.body = f"Feedback Type: {feedback_type}\n\n" \
+                   f"Job Title: {job_title}\n" \
+                   f"Date: {date}\n" \
+                   f"Comments: {comments}"
+
+        mail.send(msg)
+
+        return jsonify({"message": "Feedback sent successfully", "success": True}), 200
+
+    except Exception as e:
+        return jsonify({"message": str(e), "success": False}), 500
+
 
 
 if __name__ == '__main__':

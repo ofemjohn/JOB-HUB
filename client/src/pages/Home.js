@@ -14,6 +14,7 @@ import axios from 'axios';
 import { useSnackbarContext } from '../components/SnackBarContext';
 import PostJob from '../components/PostJob';
 import SearchIcon from '@mui/icons-material/Search';
+import FeedbackForm from '../components/FeedbackForm';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -202,6 +203,10 @@ export default function Home() {
         <Dialog open={showJobForm} onClose={handleCloseJobForm} maxWidth="md" fullWidth>
           <PostJob onClose={handleCloseJobForm} />
         </Dialog>
+        <Box sx={{ width: '100%', mt: '100px', mb: '100px', bgcolor: 'white' }}>
+          <FeedbackForm />
+        </Box>
+
       </Container>
     </React.Fragment>
   );

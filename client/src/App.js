@@ -28,7 +28,6 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         {/* Correct the path name here */}
         <Route path="/unauthorized" element={<UnAuthorized />} />
-        {/* <Route path="/register" element={<Register />} /> */}
         <Route path="/get_joblistings" element={<JobListing />} />
         <Route path="/searchLocation" element={<SearchByLocation />} />
         <Route path="/apply_job" element={<ApplyForJob />} />
