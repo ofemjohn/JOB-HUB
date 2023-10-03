@@ -80,26 +80,26 @@ function Dashboard() {
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <AppBar position="fixed" sx={{backgroundColor: '#2E3B55'}}>
-        <Tabs
+        <Tabs sx={{color: 'white'}}
           value={selectedTab}
           onChange={handleTabChange}
           variant="scrollable"
           scrollButtons="auto"
         >
           {tabs.map((tab, index) => (
-            <Tab
+            <Tab sx={{color: 'white'}}
               key={index}
               label={tab.label}
               icon={tab.icon}
             />
           ))}
-          <Tab
+          <Tab sx={{color: 'white'}}
             label="Home"
             component={Link}
             to="/"
             icon={<AddHomeWorkIcon />}
           />
-          <Tab
+          <Tab sx={{color: 'white'}}
             label="Logout"
             onClick={handleLogout}
             icon={<LogoutIcon />}

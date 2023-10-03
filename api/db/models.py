@@ -22,8 +22,8 @@ class User(db.Model):
         nullable=False,
         default=datetime.utcnow)
 
-    job_listings = db.relationship('JobListing', backref='user')
-    applications = db.relationship('Application', backref='user')
+    job_listings = db.relationship('JobListing', backref='user', cascade='all, delete-orphan')
+    applications = db.relationship('Application', backref='user', cascade='all, delete-orphan')
 
     def to_dict(self):
         '''Return a dictionary'''
@@ -57,6 +57,7 @@ class JobListing(db.Model):
     skills_required = db.Column(db.Text, nullable=True)  # Comma-separated list of skills
     experience_level = db.Column(db.String(100), nullable=True)  # Entry-level, Mid-level, Senior, etc.
     application_deadline = db.Column(db.DateTime, nullable=True)  # Deadline for applications
+    approved = db.Column(db.Boolean, default=False, nullable=False)
 
 
     application_link = db.Column(db.String(200))
@@ -71,7 +72,7 @@ class JobListing(db.Model):
     
 
 
-    applications = db.relationship('Application', backref='job_listing')
+    applications = db.relationship('Application', backref='job_listing', cascade='all, delete-orphan')
 
     def to_dict(self):
         '''Return a dictionary'''
@@ -90,7 +91,8 @@ class JobListing(db.Model):
             "job_type": self.job_type,
             "skills_required": self.skills_required,
             "experience_level": self.experience_level,
-            "application_deadline": self.application_deadline
+            "application_deadline": self.application_deadline,
+            "approved": self.approved
         }
 
 

@@ -6,7 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity, unset_jwt_cookies
 from db.models import User
 from db.db import db
-from datetime import datetime
+from datetime import datetime, timezone
 from controllers.joblisting import Joblist, set_joblisting_attributes
 from db.models import JobListing
 from sqlalchemy.exc import DataError
@@ -18,7 +18,9 @@ from flask_mail import Message
 from flask_mail import Mail
 from flask import send_from_directory
 from flask_cors import CORS
+import jwt
 import urllib.parse
+
 
 
 app = Flask(__name__)
@@ -179,10 +181,7 @@ def update_user():
             {"success": False, "message": "Error occurred", "error": str(e)}), 500
 
 
-# def add_https(url: str) -> str:
-#     if not url.startswith('http://') and not url.startswith('https://'):
-#         url = urllib.parse.urljoin('https://', url)
-#     return url
+# post a job 
 @app.route('/api/joblisting', methods=['POST'])
 @jwt_required()
 def create_joblisting():
@@ -223,21 +222,23 @@ def create_joblisting():
             {"success": False, "message": "Error occurred while posting job", "error": str(e)}), 500
 
 
-# Retrieve the list of all jobs
+# Retrieve the list of all approved jobs
 @app.route('/api/get_joblistings', methods=['GET'])
-def get_all_joblistings():
+def get_approved_joblistings():
     try:
-        job_listings = JobListing.query.all()
+        # Query only the approved jobs
+        job_listings = JobListing.query.filter_by(approved=True).all()
         job_listings_data = [job.to_dict() for job in job_listings]
 
         return jsonify({
-            "message": "All job listings retrieved successfully",
+            "message": "Approved job listings retrieved successfully",
             "success": True,
             "job_listings": job_listings_data
         }), 200
     except Exception as e:
         return jsonify(
-            {"message": "Error occurred while retrieving job listings", "success": False}), 500
+            {"message": "Error occurred while retrieving approved job listings", "success": False}), 500
+
 
 
 # Filter job listings by location with regex
@@ -423,8 +424,7 @@ def apply_job(job_id):
         resume_url = f"/uploads/{resume_filename}" if resume_filename else ""
 
         cover_letter = request.files.get('cover_letter')
-        cover_letter_filename = secure_filename(
-            cover_letter.filename) if cover_letter else ""
+        cover_letter_filename = secure_filename(cover_letter.filename) if cover_letter else ""
         cover_letter_url = f"/uploads/{cover_letter_filename}" if cover_letter_filename else ""
 
         if job_listing.listing_type == 'self':
@@ -481,32 +481,107 @@ def apply_job(job_id):
                 mail.send(msg)
 
             return jsonify({"message": "Job application submitted and sent to employer's mail successfully", "success": True}), 200
-
+            
         elif job_listing.listing_type == 'third party':
-            if applicant_email:
-                # Send email to the employer
+            if applicant_email and job_listing.application_link:
+                    # Send email to the employer
+
                 employer_email = job_listing.application_email
                 job_title = job_listing.title
 
                 msg = Message("New Job Application",
-                              sender="info@johnteacher.tech",
-                              recipients=[employer_email])
+                            sender="info@johnteacher.tech",
+                            recipients=[employer_email])
 
                 msg.body = f"Job Title: {job_title}\n\n" \
-                           f"Applicant Name: {applicant_name}\n" \
-                           f"Applicant Email: {applicant_email}"
+                            f"Applicant Name: {applicant_name}\n" \
+                            f"Applicant Email: {applicant_email}\n" \
+                            f"Resume: {resume_url}\n" \
+                            f"Cover Letter: {cover_letter_url}"
+                    
 
+                # Attach resume and cover letter as downloadable links
+                if resume:
+                    resume_path = os.path.join(
+                        app.config['UPLOAD_FOLDER'], resume_filename)
+                    resume.save(resume_path)
+                    with app.open_resource(resume_path) as resume_file:
+                        msg.attach(
+                            resume_filename,
+                            "application/octet-stream",
+                            resume_file.read())
+                    os.remove(resume_path)
+                if cover_letter:
+                    cover_letter_path = os.path.join(
+                        app.config['UPLOAD_FOLDER'], cover_letter_filename)
+                    cover_letter.save(cover_letter_path)
+                    with app.open_resource(cover_letter_path) as cover_letter_file:
+                        msg.attach(
+                            cover_letter_filename,
+                            "application/octet-stream",
+                            cover_letter_file.read())
+                    os.remove(cover_letter_path)
                 mail.send(msg)
 
-            return jsonify({"message": "Redirecting to third party application link", "success": True,
-                            "redirect_url": job_listing.application_link}), 200
+                return jsonify({"message": "Job application submitted and email sent to employer", "success": True}), 200
 
-        else:
-            return jsonify({"message": "Invalid job listing type", "success": False}), 400
+            if applicant_email:
+                # Send email to the employer
+                print("Sending email to the employer")
 
+                employer_email = job_listing.application_email
+                job_title = job_listing.title
+
+                msg = Message("New Job Application",
+                            sender="info@johnteacher.tech",
+                            recipients=[employer_email])
+
+                msg.body = f"Job Title: {job_title}\n\n" \
+                        f"Applicant Name: {applicant_name}\n" \
+                        f"Applicant Email: {applicant_email}\n" \
+                        f"Resume: {resume_url}\n" \
+                        f"Cover Letter: {cover_letter_url}"
+
+                    # Attach resume and cover letter as downloadable links
+                if resume:
+                    resume_path = os.path.join(
+                        app.config['UPLOAD_FOLDER'], resume_filename)
+                    resume.save(resume_path)
+                    with app.open_resource(resume_path) as resume_file:
+                        msg.attach(
+                            resume_filename,
+                            "application/octet-stream",
+                            resume_file.read())
+                    os.remove(resume_path)
+                if cover_letter:
+                    cover_letter_path = os.path.join(
+                        app.config['UPLOAD_FOLDER'], cover_letter_filename)
+                    cover_letter.save(cover_letter_path)
+                    with app.open_resource(cover_letter_path) as cover_letter_file:
+                        msg.attach(
+                            cover_letter_filename,
+                            "application/octet-stream",
+                            cover_letter_file.read())
+                    os.remove(cover_letter_path)
+                mail.send(msg)
+
+                return jsonify({"message": "Job application submitted and email sent to employer", "success": True}), 200
+
+            if job_listing.application_link:
+                # Redirect to third-party link if only link is present
+                print("Redirecting to third-party link")
+                return jsonify({"message": "Redirecting to third party application link", "success": True,
+                                "redirect_url": job_listing.application_link}), 200
+
+            # No email or link provided
+            return jsonify({"message": "No applicant email or application link provided", "success": False}), 400
+        
     except Exception as e:
         return jsonify({"message": "Error occurred while applying for job",
                         "success": False, "error": str(e)}), 500
+
+
+
 
 
 # Retrieve all jobs applied to by a given user
@@ -613,6 +688,152 @@ def send_feedback():
 
     except Exception as e:
         return jsonify({"message": str(e), "success": False}), 500
+    
+
+
+
+
+# Backend route to handle admin login
+@app.route("/api/admin-login", methods=["POST"])
+def admin_login():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+
+    # Check if the provided username and password match the admin credentials
+    if username == "admin" and password == "adminpassword":
+        # Assuming you use the same JWT secret key for both user and admin authentication
+        access_token = create_access_token(identity=username, additional_claims={"is_admin": True})
+        return jsonify({"success": True, "message": "Admin logged in successfully", "access_token": access_token})
+    else:
+        return jsonify({"success": False, "message": "Invalid admin credentials"})
+
+
+
+# Retrieve all applied jobs (applications) for admin
+@app.route("/api/admin/all-applied-jobs", methods=["GET"])
+def get_all_applied_jobs():
+    try:
+        # Fetch all applications
+        applications = Application.query.all()
+
+        # You can customize the response format as per your application's needs
+        application_list = []
+        for application in applications:
+            job_listing = JobListing.query.get(application.job_listing_id)
+            if job_listing:
+                application_data = {
+                    "id": application.id,
+                    "job_listing_id": application.job_listing_id,
+                    "job_title": job_listing.title,  # Add job title to response
+                    "location": job_listing.location,
+                    "applicant_name": application.applicant_name,
+                    "applicant_email": application.applicant_email,
+                    "resume": application.resume,
+                    "cover_letter": application.cover_letter,
+                    "created_at": application.created_at,
+                }
+                application_list.append(application_data)
+
+        return jsonify(
+            {"applications": application_list, "success": True}), 200
+
+    except Exception as e:
+        return jsonify({"message": "Error occurred while retrieving applied applications",
+                        "success": False, "error": str(e)}), 500
+
+
+# Route to approve a job by the admin
+@app.route("/api/admin/approve-job/<int:job_id>", methods=["PUT"])
+def approve_job(job_id):
+    try:
+        # Retrieve the job by its ID
+        job = JobListing.query.get(job_id)
+
+        # Check if the job exists
+        if not job:
+            return jsonify({"message": "Job not found", "success": False}), 404
+
+        # Set the job's approval status to True
+        job.approved = True
+
+        # Commit the changes to the database
+        db.session.commit()
+
+        # Return a success response
+        return jsonify({"message": "Job approved successfully", "success": True}), 200
+
+    except Exception as e:
+        # If an error occurs, rollback the changes and return an error response
+        db.session.rollback()
+        return jsonify({"message": "Error occurred while approving job", "success": False, "error": str(e)}), 500
+    
+
+# Route to fetch all posted jobs for approval by the admin
+@app.route("/api/admin/all-posted-jobs", methods=["GET"])
+def get_all_posted_jobs():
+    try:
+        # Query all jobs with the approved status as False
+        posted_jobs = JobListing.query.filter_by(approved=False).all()
+
+        # Convert the jobs to a list of dictionaries
+        job_listings = [job.to_dict() for job in posted_jobs]
+
+        # Return the job listings in the response
+        return jsonify({"job_listings": job_listings, "success": True}), 200
+
+    except Exception as e:
+        # If an error occurs, return an error response
+        return jsonify({"message": "Error occurred while fetching posted jobs", "success": False, "error": str(e)}), 500
+
+
+# Route to delete a job by the admin
+@app.route("/api/admin/delete-job/<int:job_id>", methods=["DELETE"])
+def delete_job(job_id):
+    try:
+        # Retrieve the job by its ID
+        job = JobListing.query.get(job_id)
+
+        # Check if the job exists
+        if not job:
+            return jsonify({"message": "Job not found", "success": False}), 404
+
+        # Delete the job from the database
+        db.session.delete(job)
+        db.session.commit()
+
+        # Return a success response
+        return jsonify({"message": "Job deleted successfully", "success": True}), 200
+
+    except Exception as e:
+        # If an error occurs, rollback the changes and return an error response
+        db.session.rollback()
+        return jsonify({"message": "Error occurred while deleting job", "success": False, "error": str(e)}), 500
+    
+
+# Route to delete jobs with a deadline date later than the current date
+@app.route("/api/admin/delete-expired-jobs", methods=["DELETE"])
+def delete_expired_jobs():
+    try:
+        # Get the current date and time
+        current_datetime = datetime.now(timezone.utc)
+
+        # Query jobs with a deadline date later than the current date
+        expired_jobs = JobListing.query.filter(JobListing.application_deadline < current_datetime).all()
+
+        # Delete each expired job and associated applications from the database
+        for job in expired_jobs:
+            db.session.delete(job)
+
+        # Commit the changes to the database
+        db.session.commit()
+
+        return jsonify({"message": "Expired jobs deleted successfully", "success": True}), 200
+
+    except Exception as e:
+        # If an error occurs, rollback the changes and return an error response
+        db.session.rollback()
+        return jsonify({"message": "Error deleting expired jobs", "success": False, "error": str(e)}), 500
 
 
 

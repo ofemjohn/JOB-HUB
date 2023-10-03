@@ -9,12 +9,14 @@ import TextareaAutosize from '@mui/material/TextareaAutosize';
 import { Grid } from '@mui/material';
 import { useSnackbarContext } from '../components/SnackBarContext'; // Import the Snackbar context
 import axios from 'axios';
+import LinearProgressWithLabel from '../components/LinearProgressWithLabel';
 
 export default function FeedbackForm() {
-  const [feedbackType, setFeedbackType] = useState('employed');
-  const [jobTitle, setJobTitle] = useState('');
+  const [feedback_type, setFeedbackType] = useState('employed');
+  const [job_title, setJobTitle] = useState('');
   const [date, setDate] = useState('');
   const [comments, setComments] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false); // State to track submission progress
 
   const { showSnackbar } = useSnackbarContext(); // Access the Snackbar context
 
@@ -23,51 +25,55 @@ export default function FeedbackForm() {
   };
 
   const handleSubmit = async (event) => {
-  event.preventDefault();
+    event.preventDefault();
 
-  const maxRetries = 3; // Maximum number of retries
-  let retries = 0;
+    setIsSubmitting(true); // Start the submission, show progress indicator
 
-  while (retries < maxRetries) {
-    try {
-      const response = await axios.post('/api/send_feedback', {
-        feedbackType,
-        jobTitle,
-        date,
-        comments,
-      });
+    const maxRetries = 3; // Maximum number of retries
+    let retries = 0;
 
-      if (response.data.success) {
-        // Show a success Snackbar message
-        showSnackbar('success', 'Feedback submitted successfully');
-        // Optionally reset the form fields
-        setFeedbackType('employed');
-        setJobTitle('');
-        setDate('');
-        setComments('');
-        return; // Exit the loop if the submission is successful
-      } else {
+    while (retries < maxRetries) {
+      try {
+        const response = await axios.post('/api/send_feedback', {
+          feedback_type,
+          job_title,
+          date,
+          comments,
+        });
+
+        if (response.data.success) {
+          // Show a success Snackbar message
+          showSnackbar('success', 'Feedback submitted successfully');
+          // Optionally reset the form fields
+          setFeedbackType('employed');
+          setJobTitle('');
+          setDate('');
+          setComments('');
+          setIsSubmitting(false); // Submission completed, hide progress indicator
+          return; // Exit the loop if the submission is successful
+        } else {
+          // Show an error Snackbar message
+          showSnackbar('error', response.data.message);
+          setIsSubmitting(false); // Submission completed with an error, hide progress indicator
+          return; // Exit the loop on error
+        }
+      } catch (error) {
         // Show an error Snackbar message
-        showSnackbar('error', response.data.message);
-        return; // Exit the loop on error
-      }
-    } catch (error) {
-      // Show an error Snackbar message
-      showSnackbar('error', 'Error submitting feedback');
+        showSnackbar('error', 'Error submitting feedback. please check your internet connection and try again.');
 
-      retries++; // Increment the retry counter
-      if (retries >= maxRetries) {
-        // Maximum retries reached, show an error message and exit the loop
-        showSnackbar('error', 'Maximum retry attempts reached');
-        break;
-      }
+        retries++; // Increment the retry counter
+        if (retries >= maxRetries) {
+          // Maximum retries reached, show an error message and exit the loop
+          showSnackbar('error', 'Maximum retry attempts reached');
+          setIsSubmitting(false); // Submission completed with maximum retries, hide progress indicator
+          break;
+        }
 
-      // Wait for a short time before retrying (e.g., 1 second)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Wait for a short time before retrying (e.g., 1 second)
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
     }
-  }
-};
-
+  };
 
   return (
     <Container maxWidth="lg">
@@ -96,7 +102,7 @@ export default function FeedbackForm() {
                 variant="outlined"
                 label="Feedback Type"
                 placeholder="Feedback Type"
-                value={feedbackType}
+                value={feedback_type}
                 onChange={handleFeedbackTypeChange}
                 required
                 select
@@ -110,7 +116,7 @@ export default function FeedbackForm() {
                 fullWidth
                 variant="outlined"
                 label="Job Title"
-                value={jobTitle}
+                value={job_title}
                 onChange={(e) => setJobTitle(e.target.value)}
                 required
               />
@@ -147,14 +153,19 @@ export default function FeedbackForm() {
                 color="primary"
                 size="large"
                 sx={{
-            backgroundColor: '#125469',
-            '&:hover': { backgroundColor: '#1C8FB4' },
-            color: '#fff'
-          }}
+                  backgroundColor: '#125469',
+                  '&:hover': { backgroundColor: '#1C8FB4' },
+                  color: '#fff',
+                }}
               >
-                Submit
+                Submit feedback
               </Button>
             </Grid>
+            {isSubmitting && (
+              <Grid item xs={12}>
+                <LinearProgressWithLabel />
+              </Grid>
+            )}
           </Grid>
         </form>
       </Box>

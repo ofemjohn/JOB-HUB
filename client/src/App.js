@@ -12,14 +12,20 @@ import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import { SnackbarProvider } from './components/SnackBarContext';
 import ToastMessage from './components/ToastMessage'
-
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminAllAppliedJobs from "./pages/AdminAllAppliedJobs";
+import AdminAllPostedJobs from "./pages/AdminAllPostedJobs";
 
 
 const App = () => {
   return (
      <SnackbarProvider>
       <Routes>
-      <Route path="/dashboard" element={<Profile />} />
+        <Route path="/dashboard" element={<Profile />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/adminall-applied-jobs" element={<AdminAllAppliedJobs />} />
+        <Route path="/adminall-posted-jobs" element={<AdminAllPostedJobs />} />
       <Route path="/" element={<Layout />}>
         {/* Use 'index' for the Home component */}
         <Route index element={<Home />} />
@@ -32,6 +38,8 @@ const App = () => {
         <Route path="/searchLocation" element={<SearchByLocation />} />
         <Route path="/apply_job" element={<ApplyForJob />} />
         <Route path="/applications" element={<Applications />} />
+        <Route path="/admin" element={<AdminLogin />} />
+        
         <Route path="*" element={<NotFound />} />
       </Route>
       </Routes>

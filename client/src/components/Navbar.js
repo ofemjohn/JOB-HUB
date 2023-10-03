@@ -196,12 +196,22 @@ const Navbar = () => {
                       Login
                     </Button>
                   </Link>
+  
                   <Button
                     onClick={handleDashboardClick}
                     sx={{ color: 'white', marginLeft: '8px' }}
                   >
                     Dashboard
                   </Button>
+
+                   <Link to="/admin" style={{ textDecoration: 'none' }}>
+                    <Button
+                      onClick={handleCloseNavMenu}
+                      sx={{ color: 'white', marginLeft: '8px' }}
+                    >
+                      Admin
+                    </Button>
+                  </Link>
                 </Box>
 
                 {/* Render the Logout button only when the user is authorized */}
